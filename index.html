@@ -251,6 +251,8 @@ const TRIP = {
 };
 const SYNC = { api: 'https://jsonblob.com/api/jsonBlob/', id: '' };
 /* Фото, загруженные через сайт: хранятся в этом репозитории GitHub (photos/up/ и photos.json). */
+/* Редактирование фото на сайте выключено: false — сайт только для просмотра. */
+const EDIT_PHOTOS = false;
 const GH = { owner: 'spartakmoscow20181st-source', repo: 'phuket-villas', branch: 'main', file: 'photos.json' };
 
 const DRIVE_IDS = ["1Pl5WnNlDcCo9twYqP4Q7Eq3MyoPNFhmL", "1UoZ6oR2F4GffHDCkgL3Zrwmvvs6yJbeJ", "14qXT84mRvhmOxQyDmkPMGL70Ar4B8WuK", "12s9Xlx631Zo31QnZn7Egm_qwy83hIn9d", "1Iy5G7_VCq58MMuFlyCtjVV4aOnsGaNDl", "1STAATr8vVz0xRlvKs1-ELWr8G2Vog7ev", "1m66rKG6PA-jtMTy5T-aywDCdcL39r2mn", "1Bz1Tow82dTzClz5jRE_pxa90rhahhdVw", "1qL9URxQiUIg1bGNO9XpLVcG0184OhFcC", "1sbWO2XjEGXInd7OjP5YNqOzRRCDSztr8", "1IZPTBBTr8omyJdVZNd5SotuFDccGZb-u", "1Iz81fd3dJO-WI04mFActiX0h1UzgJGXp", "1ZmJVnwSFm5WWjBqeiqQC-7fLEp5NqcaI", "1URp407wcCJDT80sneluo9cpaS5rvS7Oz", "1Eoml5SCQ267moyiblkCfPwFcWim5RgGo", "19UzYs5Pq9uTFMUFabnJDHHrUQ_8owhiY", "1hfHEXmaCpJ4VvzzvaKBR9n9-rl_jwQe2", "19RY3kE6sGRMz2Jo3AMrnm2MItSoafp1W", "1DGJTODvfpooW9eI10215iQf8n8pparEa", "1p_DGmXxR2_awzHjXHDVuKWLMfiVDnPU9", "1ikQodsL5i1FBVkK2JXljFu3pWOYvwgwJ", "1q5gchWLdHE2p05IAPVkjKVC8RufmlD4J", "1Jfo2lIc3rXlY5cJqJ1EV4-H98Zzt29eU", "1vK_w2kc-5ewYHR3oi7f0Ck-LP7Rf02Yp", "1dVuisKWJylkQ8-aCAc47cAH-LB7M7N9F", "1LgJd_d_a-Xcy7Qk4HyEoomaDF1-zShEf", "18zrVKbCae0I0i3GZ947PGqgTr-1W4luG", "1kArZgW9-L0euQcRiNgpybhtKVvkadWbn", "1rHavfwCedDiyy4gZXzEbXFVpb4B5TqJ2", "17fIHTEhnhB_ztdKWUlcGv6p93Jgq34yB", "1ZfZoQFZpK_sXIfabVhyBzdkm3OlzzShK", "16fbMi3N1ZmJHZOf61tgbAK3uhhGidli0", "19ClSyktjSE9s6ntMRXErJ0KfULQCcRb5", "1SFPAv4UxFbNKNatC4YeLd1gt1sFVhhgo", "1NqmkWs_Ku57WbdLj9xTH3l8jK7N-o91_", "1PFoKBWrIjvYILtflSFAO97n70fxKATE6", "1Li3ioMjvsntCwQvuCxnWk3pnZQpACdiV", "1nZptGZN8xEQJrDuI8r74BHbVmdlF04Md", "1RRpVFZ0oVVEvFBxds2mCJFiIfw5mf68B", "1NuZeHbtoMvibZOhNNuO89KncKD6PtC8S", "1kjl-cxUE4NhkbSJ_34Upj9P0SU7GGcnu", "1daZmB7RTfklRRFlZZArBI24m4OgTJKrv", "1Ex5FVEqHTgRmn1O23gamXSJdJrnxdnXz", "1XySUxJT6R9Eod03c5Le8IVBavqpgwW-Y", "1azzUBLR99b7UEuqRvvDs2v3VW-WeXJqF", "1ttKDgfhIES1kUwYtnBO2Ow6-S436ijno", "1glLVWKm7Pr8unZjTP2Z4KA0YQx6-nRgU", "1I9GOx3Jon-9PmGZrmuqrqwX_u6UgxP8g", "1_qBkLU0FThRGICgxVlKvexI_C8rpo8Xi", "1RuDHoZCx-6mVxRg1Z2L32LpBsP9ipOSz", "1J7PKtvWlNsUNJ4gJcaYG7foH4Za-SDvB", "1ElOXxwsjqESuelyJ0pozNj0NV8P1lVp2", "1upJUJuI16RednjrpsddDyytoWcmLGTar", "1E7IAofFZ3UzJlZsQi-fX1YZgPcIv6Yrq"];
@@ -825,7 +827,7 @@ async function deleteUploaded(url){
   }catch(e){}
 }
 function photoEditor(v){
-  if(!ghToken()) return '';
+  if(!EDIT_PHOTOS || !ghToken()) return '';
   if(!editOpen) return `<div class="ped"><button class="btn" data-pedit>Редактировать фото (${v.photos.length})</button></div>`;
   return `<div class="ped"><b>Фото: ${v.photos.length}</b> <span class="st">· первое — обложка; ‹ › — порядок, ★ — сделать обложкой, ✕ — удалить (нажать дважды)</span>
     <div class="pth">${v.photos.map((u, i) => `<div class="pt"><img src="${esc(u)}" alt="" loading="lazy"><span class="n">${i + 1}</span>
@@ -848,7 +850,7 @@ function photoAction(d, el){
   edited.add(v.id); setPhotos(v, list); refreshPhotos(v); pstat('Сохраняю…'); savePhotoMetaSoon();
 }
 function renderAdmin(){
-  const t = ghToken();
+  const t = EDIT_PHOTOS && ghToken();
   $('#adm').innerHTML = t ? `<div class="setup"><b>Режим редактирования включён</b><p class="st">Откройте карточку виллы → «Редактировать фото».</p><button class="btn" data-ghlogout>Выйти из режима</button></div>` : '';
 }
 async function saveToken(){
@@ -864,7 +866,7 @@ async function saveToken(){
   }catch(e){ $('#ghMsg').textContent = 'Не получилось: ' + e.message; }
 }
 $('#ghOk').addEventListener('click', saveToken);
-if(location.hash === '#admin' && !ghToken()) setTimeout(() => $('#ghd').classList.add('on'), 300);
+if(EDIT_PHOTOS && location.hash === '#admin' && !ghToken()) setTimeout(() => $('#ghd').classList.add('on'), 300);
 
 /* ---------- избранное ---------- */
 let pendingLike = null;
@@ -1283,7 +1285,7 @@ document.addEventListener('click', e => {
 $('#sort').addEventListener('change', e => { F.sort = e.target.value; store.set('phk-filter', F); renderList(); });
 document.addEventListener('keydown', e => { if(e.key === 'Escape' && openId) closeSheet(); });
 
-renderFilters(); renderList(); renderFav(); renderLayers(); renderAdmin(); loadPhotoMeta();
+renderFilters(); renderList(); renderFav(); renderLayers(); renderAdmin(); if(EDIT_PHOTOS) loadPhotoMeta();
 if(syncId()){ pull(); setInterval(() => { if(!document.hidden) pull(); }, 15000); }
 document.addEventListener('visibilitychange', () => { if(!document.hidden && syncId()) pull(); });
 }
