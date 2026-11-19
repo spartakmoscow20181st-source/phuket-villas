@@ -78,6 +78,7 @@ nav.tabs em:empty{display:none}
 .lk{display:flex;align-items:center;gap:8px;margin-top:12px;font-size:13px;color:var(--mute);min-height:26px}
 .lk .av{display:flex}.lk .av b{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;color:#fff;font-size:12px;font-weight:800;border:2px solid var(--card);margin-left:-8px}
 .lk .av b:first-child{margin-left:0}
+.lk:empty{display:none}
 .lk span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .heart em{position:absolute;top:-4px;right:-4px;min-width:20px;height:20px;border-radius:10px;background:var(--coral);color:#fff;font:800 11px/20px Manrope,sans-serif;font-style:normal;padding:0 5px}
 .heart em:empty{display:none}
@@ -91,6 +92,18 @@ nav.tabs em:empty{display:none}
 #ask .askb{position:absolute;left:16px;right:16px;top:28%;background:var(--card);border-radius:20px;padding:20px;max-width:420px;margin:0 auto;display:grid;gap:12px}
 #ask p{margin:0;color:var(--mute);font-size:14px}
 .vpin.apx{border-style:dashed}
+.ped{background:var(--card);border-radius:16px;padding:12px;margin:12px 16px 0}
+.pth{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px;margin:8px 0 12px}
+.pt{position:relative;border-radius:10px;overflow:hidden;background:var(--soft)}
+.pt img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover}
+.pt .n{position:absolute;left:4px;top:4px;background:rgba(0,0,0,.6);color:#fff;font-size:11px;font-weight:800;border-radius:6px;padding:1px 6px}
+.pt .bt{display:grid;grid-template-columns:repeat(4,1fr)}
+.pt .bt button{border:0;background:var(--bg);height:34px;font-size:15px;font-weight:800;color:var(--ink)}
+.pt .bt button.arm{background:var(--coral);color:#fff}
+.ped .btn{width:100%}
+.steps{margin:0;padding-left:20px;font-size:13px;color:var(--mute);display:grid;gap:4px}
+#ghd .askb{position:absolute;left:12px;right:12px;top:calc(40px + var(--st));background:var(--card);border-radius:20px;padding:18px;max-width:460px;margin:0 auto;display:grid;gap:10px}
+#ghd h3{font-size:18px}#ghd p{margin:0;font-size:14px;color:var(--mute)}
 /* карта — условная схема */
 :root{--seaM:#bfe2e8;--land:#f5f0e1;--coast:#ffffff;--hill:#d3e6c2;--road:#ffffff;--roadE:#d8ceb0;--lab:#4a6064;--seaL:#3f8794}
 :root[data-theme=dark]{--seaM:#08202a;--land:#22342f;--coast:#3a5a55;--hill:#2a4335;--road:#415a55;--roadE:#2a403c;--lab:#9fb6b5;--seaL:#5fa9b3}
@@ -111,13 +124,21 @@ nav.tabs em:empty{display:none}
 #mk.small .vpin{font-size:0;padding:0;width:16px;height:16px;border-radius:50%;transform:translate(-50%,-50%)}
 #mk.small .vpin::after{display:none}
 .vpin.fav{background:#c2185b}.vpin.sel{background:var(--sea);transform:translate(-50%,calc(-100% - 7px)) scale(1.15)}
-.ppin{position:absolute;left:-12px;top:-12px;width:24px;height:24px;border-radius:50%;border:2px solid #fff;display:grid;place-items:center;box-shadow:0 2px 6px rgba(0,0,0,.3)}
-.ppin svg{width:13px;height:13px;stroke:#fff;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
-.pl{position:absolute;top:-9px;line-height:18px;font-size:12px;font-weight:700;white-space:nowrap;color:var(--ink);text-shadow:0 0 3px var(--land),0 0 3px var(--land),0 0 4px var(--land)}
-.pl.r{left:15px}.pl.l{right:15px}
-.al{position:absolute;left:0;top:0;transform:translate(-50%,-50%);font-size:13px;font-style:italic;font-weight:600;color:var(--lab);white-space:nowrap}
+.ppin{position:absolute;left:-10px;top:-10px;width:20px;height:20px;opacity:.72;filter:saturate(.6);border-radius:50%;border:2px solid #fff;display:grid;place-items:center;box-shadow:0 2px 6px rgba(0,0,0,.3)}
+.ppin svg{width:11px;height:11px;stroke:#fff;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.pl{position:absolute;top:-8px;line-height:16px;font-size:11px;font-weight:600;white-space:nowrap;color:var(--mute);text-shadow:0 0 3px var(--land),0 0 3px var(--land),0 0 4px var(--land)}
+.pl.r{left:13px}.pl.l{right:13px}
+.al{position:absolute;left:0;top:0;transform:translate(-50%,-50%);opacity:.75;font-size:13px;font-style:italic;font-weight:600;color:var(--lab);white-space:nowrap}
 .al.sea{font-size:14px;color:var(--seaL)}
 .hide{visibility:hidden}
+.al.zone{opacity:1;font-style:normal;font-weight:800;font-size:14px;color:#fff;background:#d6336c;padding:3px 10px;border-radius:999px;box-shadow:0 2px 8px rgba(214,51,108,.4)}
+.zoneP{fill:#ff6a9a;fill-opacity:.10;stroke:#d6336c;stroke-opacity:.45;stroke-width:1.5;stroke-dasharray:5 4}
+.zoneC{fill:#ff3d7f;fill-opacity:.22}
+.vdot{position:absolute;left:-5px;top:-5px;width:10px;height:10px;border-radius:50%;background:var(--coral);border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.vline{position:absolute;left:0;top:-1px;height:2px;width:0;background:#fff;box-shadow:0 0 2px rgba(0,0,0,.45);transform-origin:0 50%;z-index:1}
+.vdot{z-index:2}.vpin{z-index:3}.vpin.sel{z-index:5}
+#mk.small .vdot,#mk.small .vline{display:none}
+.vpin.side::after{display:none}
 .tip{position:absolute;left:0;top:0;transform:translate(-50%,calc(-100% - 18px));pointer-events:auto;background:var(--card);color:var(--ink);border-radius:12px;padding:9px 12px;box-shadow:0 6px 20px rgba(0,0,0,.25);font-size:13px;width:max-content;max-width:230px;line-height:1.35}
 .tip b{display:block;font-size:14px}.tip a{display:inline-block;margin-top:6px;font-weight:800;color:var(--sea)}
 :root[data-theme=dark] .tip a{color:#5fd0c8}
@@ -213,17 +234,18 @@ const TRIP = {
   dates: '27 дек – 7 янв',
   nights: 11,
   people: 5,
-  budgetMin: 450000,
-  budgetMax: 500000,
+  ppMax: 120000,
   rate: 2.3967,
   rateNote: 'курсу ЦБ РФ на 3 ноября 2026'
 };
 const SYNC = { api: 'https://jsonblob.com/api/jsonBlob/', id: '' };
+/* Фото, загруженные через сайт: хранятся в этом репозитории GitHub (photos/up/ и photos.json). */
+const GH = { owner: 'spartakmoscow20181st-source', repo: 'phuket-villas', branch: 'main', file: 'photos.json' };
 
 const VILLAS = [
   { id:'patong-hill', name:'Дом на холме, три уровня', area:'Патонг', lat:7.8900, lng:98.2990, approx:true,
     priceThb:258000, bedrooms:3, seaM:750, pool:null,
-    photos:[], link:'https://kommo.cc/K/YXINY6/YR9I1O', linkText:'Фото и объявление',
+    photos:['photos/patong-hill-01.jpg','photos/patong-hill-02.jpg','photos/patong-hill-03.jpg','photos/patong-hill-04.jpg','photos/patong-hill-05.jpg','photos/patong-hill-06.jpg','photos/patong-hill-07.jpg','photos/patong-hill-08.jpg','photos/patong-hill-09.jpg','photos/patong-hill-10.jpg','photos/patong-hill-11.jpg','photos/patong-hill-12.jpg','photos/patong-hill-13.jpg','photos/patong-hill-14.jpg','photos/patong-hill-15.jpg','photos/patong-hill-16.jpg','photos/patong-hill-17.jpg','photos/patong-hill-18.jpg','photos/patong-hill-19.jpg','photos/patong-hill-20.jpg','photos/patong-hill-21.jpg','photos/patong-hill-22.jpg','photos/patong-hill-23.jpg'], link:'https://kommo.cc/K/YXINY6/YR9I1O', linkText:'Все фото на Google Диске',
     desc:'Современный трёхуровневый дом на склоне холма с видом на залив Патонг со всех этажей. Три спальни, главная — с балконом и джакузи с видом на море, гостиная с кухней и большая тенистая терраса.',
     amenities:['Вид на залив','Джакузи в главной спальне','Терраса','Посудомоечная машина','Стиральная машина','Бесплатная парковка'] },
   { id:'chalong-thai', name:'Тайская вилла 300 м²', area:'Чалонг', lat:7.8290, lng:98.3500, approx:true,
@@ -317,6 +339,7 @@ const PLACES = [
   <div class="sec"><h4>Мои отметки</h4></div>
   <div class="flist" id="flist"></div>
   <div id="cmp"></div>
+  <div class="sec" id="adm"></div>
   <div class="acts" id="favActs">
     <button class="btn c" id="shareBtn"><svg class="i"><use href="#i-share"/></svg>Отправить в чат</button>
     <button class="btn" id="copyBtn">Скопировать текст</button>
@@ -333,6 +356,13 @@ const PLACES = [
 <div class="sheet" id="ask"><div class="bd" data-askclose></div><div class="askb">
   <h3>Как вас зовут?</h3><p>Имя увидят друзья рядом с вашими лайками.</p>
   <input id="askName" maxlength="30" placeholder="Имя" autocomplete="off"><button class="btn c" id="askOk">Готово</button></div></div>
+<div class="sheet" id="ghd"><div class="bd" data-ghclose></div><div class="askb">
+  <h3>Режим редактирования фото</h3>
+  <p>Нужен ключ доступа GitHub — он хранится только на этом устройстве. Как получить:</p>
+  <ol class="steps"><li>github.com → фото профиля → Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token.</li>
+  <li>Repository access: Only select repositories → <b>phuket-villas</b>.</li><li>Permissions → Repository permissions → Contents: <b>Read and write</b>.</li><li>Generate token, скопируйте и вставьте сюда.</li></ol>
+  <input id="ghTok" placeholder="github_pat_…" autocomplete="off" spellcheck="false"><p class="st" id="ghMsg"></p>
+  <button class="btn c" id="ghOk">Включить</button></div></div>
 <div class="toast" id="toast"></div>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -408,7 +438,7 @@ VILLAS.forEach((v, idx) => {
   const nb = beaches.map(b => ({ b, d: dist(v, b) })).sort((a, b) => a.d - b.d)[0];
   v.beach = v.seaM != null ? v.seaM / 1000 : nb ? nb.d : 99;
   v.toBangla = bangla ? dist(v, bangla) : null;
-  v.fit = v.total <= TRIP.budgetMax ? 'ok' : v.total <= TRIP.budgetMax * 1.1 ? 'mid' : 'over';
+  v.fit = v.pp <= TRIP.ppMax ? 'ok' : v.pp <= TRIP.ppMax * 1.1 ? 'mid' : 'over';
 });
 const seaTxt = v => v.seaM != null ? km(v.seaM / 1000) + ' до моря' : '≈\u00a0' + km(v.beach) + ' до пляжа';
 function facts(v, full){
@@ -424,10 +454,11 @@ $('#ttl').textContent = TRIP.title;
 $('#sub').textContent = `${TRIP.dates} · ${TRIP.nights} ночей · делим на ${TRIP.people}`;
 $('#stats').innerHTML = [
   `${VILLAS.length} ${plural(VILLAS.length, ['вариант', 'варианта', 'вариантов'])}`,
+  `бюджет до ${Math.round(TRIP.ppMax / 1000)} тыс ₽ с чел.`,
   `от ${thb(Math.min(...VILLAS.map(v => v.thb)))}`,
   `1 ฿ ≈ ${String(TRIP.rate.toFixed(2)).replace('.', ',')} ₽`
 ].map(s => `<span>${esc(s)}</span>`).join('');
-$('#demo').textContent = `Рубли — по ${TRIP.rateNote} (${TRIP.rate.toFixed(2).replace('.', ',')} ₽ за бат). «С человека» — сумма за весь период на ${TRIP.people}. Бюджет ${Math.round(TRIP.budgetMin / 1000)}–${Math.round(TRIP.budgetMax / 1000)} тыс ₽ на всех.`;
+$('#demo').textContent = `Рубли — по ${TRIP.rateNote} (${TRIP.rate.toFixed(2).replace('.', ',')} ₽ за бат). «С человека» — сумма за весь период на ${TRIP.people}. Бюджет — до ${Math.round(TRIP.ppMax / 1000)} тыс ₽ с человека.`;
 
 /* ---------- фильтры ---------- */
 const areas = [...new Set(VILLAS.map(v => v.area))];
@@ -487,6 +518,7 @@ function openSheet(id){
   const gm = `https://www.google.com/maps/search/?api=1&query=${v.lat},${v.lng}`;
   $('#pn').innerHTML = `<button class="x" data-close aria-label="Закрыть"><svg class="i"><use href="#i-x"/></svg></button>
   ${gallery(v)}${''}<span class="badge ${v.fit}">${FIT[v.fit]}</span></div>
+  ${photoEditor(v)}
   <div class="shb">
     <div class="r1"><div><div class="area"><svg class="i"><use href="#i-pin"/></svg>${esc(v.area)} · ${seaTxt(v)}</div><h2>${esc(v.name)}</h2></div>
       ${heartBtn(v, true)}</div>
@@ -510,13 +542,14 @@ function openSheet(id){
     </div>
   </div>`;
   bindGalleries($('#pn'));
+  const pf = $('#pfile'); if(pf) pf.addEventListener('change', e => { uploadPhotos(v, [...e.target.files]); e.target.value = ''; });
   $('#sheet').classList.add('on');
   $('#pn').scrollTop = 0;
   document.body.style.overflow = 'hidden';
   syncBack();
 }
 function closeSheet(){
-  $('#sheet').classList.remove('on'); openId = null;
+  $('#sheet').classList.remove('on'); openId = null; editOpen = false;
   document.body.style.overflow = ''; syncBack();
 }
 
@@ -628,6 +661,138 @@ if(location.hash === '#setup'){
   });
 }
 
+/* ---------- фото: загрузка, порядок, удаление (через GitHub) ---------- */
+let photoSha = null, editOpen = false, photoBusy = false;
+const edited = new Set();
+const ghToken = () => store.get('phk-gh', '');
+const ghApi = path => `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${path}`;
+const ghH = t => ({ Authorization: 'Bearer ' + t, Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28' });
+const rawUrl = path => `https://raw.githubusercontent.com/${GH.owner}/${GH.repo}/${GH.branch}/${path}`;
+function b64enc(str){ const b = new TextEncoder().encode(str); let s = ''; for(let i = 0; i < b.length; i += 0x8000) s += String.fromCharCode.apply(null, b.subarray(i, i + 0x8000)); return btoa(s); }
+function b64dec(b64){ const bin = atob(String(b64).replace(/\s/g, '')); return new TextDecoder().decode(Uint8Array.from(bin, c => c.charCodeAt(0))); }
+function setPhotos(v, list){
+  v.photos = list.slice();
+  v.imgs = v.photos.length ? v.photos : [ph(VILLAS.indexOf(v), 0, v.link ? 'Фото — по ссылке в карточке' : 'Фото скоро будут')];
+}
+async function loadPhotoMeta(){
+  let data = null; const tok = ghToken();
+  try{
+    if(tok){
+      const r = await fetch(ghApi(GH.file) + '?ref=' + GH.branch, { headers: ghH(tok), cache: 'no-store' });
+      if(r.ok){ const j = await r.json(); photoSha = j.sha; data = JSON.parse(b64dec(j.content)); }
+    } else if(/^https?:/.test(location.href)){
+      const r = await fetch(GH.file + '?t=' + Date.now(), { cache: 'no-store' });
+      if(r.ok) data = await r.json();
+    }
+  }catch(e){}
+  if(!data || !data.photos) return;
+  for(const v of VILLAS) if(Array.isArray(data.photos[v.id])){ setPhotos(v, data.photos[v.id]); edited.add(v.id); }
+  renderList(); renderFav(); drawVillas(); if(openId) reopenSheet();
+}
+async function ghPut(path, content, message, sha){
+  const body = { message, content, branch: GH.branch }; if(sha) body.sha = sha;
+  const r = await fetch(ghApi(path), { method: 'PUT', headers: ghH(ghToken()), body: JSON.stringify(body) });
+  if(!r.ok){ const t = await r.text(); const e = new Error('GitHub ' + r.status); e.status = r.status; e.body = t; throw e; }
+  return r.json();
+}
+let saveT = 0;
+function savePhotoMetaSoon(){ clearTimeout(saveT); saveT = setTimeout(savePhotoMeta, 700); }
+async function savePhotoMeta(){
+  if(!ghToken()) return;
+  const photos = {}; VILLAS.forEach(v => { if(edited.has(v.id)) photos[v.id] = v.photos; });
+  const content = b64enc(JSON.stringify({ v: 1, photos }, null, 1));
+  try{
+    let j;
+    try{ j = await ghPut(GH.file, content, 'Фото: обновлён список', photoSha); }
+    catch(e){
+      if(e.status !== 409 && e.status !== 422) throw e;
+      const g = await fetch(ghApi(GH.file) + '?ref=' + GH.branch, { headers: ghH(ghToken()), cache: 'no-store' });
+      photoSha = g.ok ? (await g.json()).sha : null;
+      j = await ghPut(GH.file, content, 'Фото: обновлён список', photoSha);
+    }
+    photoSha = j.content.sha; pstat('Сохранено. Друзья увидят изменения через 1–2 минуты.');
+  }catch(e){ pstat('Не удалось сохранить список фото (' + e.message + ').'); toast('Ошибка сохранения фото'); }
+}
+function pstat(t){ const el = $('#pstat'); if(el) el.textContent = t; }
+function resizeImage(file, max, q){
+  return new Promise((res, rej) => {
+    const url = URL.createObjectURL(file), img = new Image();
+    img.onload = () => {
+      const k = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight));
+      const c = document.createElement('canvas'); c.width = Math.round(img.naturalWidth * k); c.height = Math.round(img.naturalHeight * k);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); URL.revokeObjectURL(url);
+      res(c.toDataURL('image/jpeg', q).split(',')[1]);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); rej(new Error('не удалось прочитать файл')); };
+    img.src = url;
+  });
+}
+async function uploadPhotos(v, files){
+  if(photoBusy || !files.length) return;
+  photoBusy = true; let ok = 0;
+  for(let i = 0; i < files.length; i++){
+    pstat(`Загружаю ${i + 1} из ${files.length}…`);
+    try{
+      const b64 = await resizeImage(files[i], 1600, 0.82);
+      const path = `photos/up/${v.id}-${Date.now().toString(36)}-${i}.jpg`;
+      await ghPut(path, b64, 'Фото: ' + v.name);
+      v.photos.push(rawUrl(path)); ok++;
+    }catch(e){ toast(`Фото ${i + 1} не загрузилось: ${e.message}`); }
+  }
+  photoBusy = false;
+  if(ok){ edited.add(v.id); setPhotos(v, v.photos); refreshPhotos(v); await savePhotoMeta(); }
+  else pstat('Ничего не загрузилось.');
+}
+async function deleteUploaded(url){
+  const m = url.match(/\/(photos\/up\/[^/?#]+)$/); if(!m || !ghToken()) return;
+  try{
+    const g = await fetch(ghApi(m[1]) + '?ref=' + GH.branch, { headers: ghH(ghToken()), cache: 'no-store' }); if(!g.ok) return;
+    const { sha } = await g.json();
+    await fetch(ghApi(m[1]), { method: 'DELETE', headers: ghH(ghToken()), body: JSON.stringify({ message: 'Фото: удалено', sha, branch: GH.branch }) });
+  }catch(e){}
+}
+function photoEditor(v){
+  if(!ghToken()) return '';
+  if(!editOpen) return `<div class="ped"><button class="btn" data-pedit>Редактировать фото (${v.photos.length})</button></div>`;
+  return `<div class="ped"><b>Фото: ${v.photos.length}</b> <span class="st">· первое — обложка; ‹ › — порядок, ★ — сделать обложкой, ✕ — удалить (нажать дважды)</span>
+    <div class="pth">${v.photos.map((u, i) => `<div class="pt"><img src="${esc(u)}" alt="" loading="lazy"><span class="n">${i + 1}</span>
+      <div class="bt"><button data-pmv="${i}" data-d="-1" aria-label="Левее">‹</button><button data-pcover="${i}" aria-label="Обложка">★</button><button data-pmv="${i}" data-d="1" aria-label="Правее">›</button><button data-pdel="${i}" aria-label="Удалить">✕</button></div></div>`).join('')}</div>
+    <label class="btn c">Добавить фото<input type="file" id="pfile" accept="image/*" multiple hidden></label>
+    <p class="st" id="pstat" style="margin-top:8px"></p>
+    <button class="btn" data-pedit style="margin-top:8px">Готово</button></div>`;
+}
+function refreshPhotos(v){ renderList(); renderFav(); drawVillas(); if(openId === v.id) reopenSheet(); }
+function reopenSheet(){ const st = $('#pn').scrollTop, ps = $('#pstat') ? $('#pstat').textContent : ''; openSheet(openId); $('#pn').scrollTop = st; if(ps) pstat(ps); }
+function photoAction(d, el){
+  const v = VILLAS.find(x => x.id === openId); if(!v) return;
+  const list = v.photos.slice();
+  if('pmv' in d){ const i = +d.pmv, j = i + +d.d; if(j < 0 || j >= list.length) return; [list[i], list[j]] = [list[j], list[i]]; }
+  else if('pcover' in d){ const i = +d.pcover; list.unshift(list.splice(i, 1)[0]); }
+  else if('pdel' in d){
+    if(!el.classList.contains('arm')){ document.querySelectorAll('.pt .arm').forEach(b => b.classList.remove('arm')); el.classList.add('arm'); return; }
+    const [u] = list.splice(+d.pdel, 1); deleteUploaded(u);
+  }
+  edited.add(v.id); setPhotos(v, list); refreshPhotos(v); pstat('Сохраняю…'); savePhotoMetaSoon();
+}
+function renderAdmin(){
+  const t = ghToken();
+  $('#adm').innerHTML = t ? `<div class="setup"><b>Режим редактирования включён</b><p class="st">Откройте карточку виллы → «Редактировать фото».</p><button class="btn" data-ghlogout>Выйти из режима</button></div>` : '';
+}
+async function saveToken(){
+  const t = $('#ghTok').value.trim(); if(!t) return;
+  $('#ghMsg').textContent = 'Проверяю…';
+  try{
+    const r = await fetch(`https://api.github.com/repos/${GH.owner}/${GH.repo}`, { headers: ghH(t), cache: 'no-store' });
+    const j = r.ok ? await r.json() : null;
+    if(!j) throw new Error('ключ не подошёл (' + r.status + ')');
+    if(j.permissions && !j.permissions.push) throw new Error('у ключа нет права записи — включите Contents: Read and write');
+    store.set('phk-gh', t); $('#ghd').classList.remove('on'); toast('Режим редактирования включён');
+    renderAdmin(); loadPhotoMeta(); if(openId) reopenSheet();
+  }catch(e){ $('#ghMsg').textContent = 'Не получилось: ' + e.message; }
+}
+$('#ghOk').addEventListener('click', saveToken);
+if(location.hash === '#admin' && !ghToken()) setTimeout(() => $('#ghd').classList.add('on'), 300);
+
 /* ---------- избранное ---------- */
 let pendingLike = null;
 function toggleFav(id){
@@ -715,6 +880,9 @@ const ROADS = [
 const AREAS = [['Патонг',7.904,98.313],['Камала',7.957,98.298],['Карон',7.849,98.309],['Ката',7.815,98.314],['Равай',7.783,98.339],
   ['Чалонг',7.833,98.349],['Пхукет-таун',7.902,98.392],['Кату',7.917,98.341],['Таланг',8.035,98.352],['Банг Тао',8.002,98.302],
   ['Май Кхао',8.160,98.306],['Найтон',8.058,98.297],['Кейп Панва',7.815,98.398]];
+const ZONE = { name: 'Блядство 😌', label: [7.8935, 98.3000],
+  district: [[7.9135,98.2905],[7.9140,98.3020],[7.9070,98.3120],[7.8930,98.3150],[7.8800,98.3080],[7.8760,98.2950],[7.8840,98.2885],[7.8960,98.2925]],
+  center: [7.8935, 98.2995, 0.55, 0.75] };
 const SEAS = [['Андаманское море',7.930,98.205],['Залив Пхангнга',8.000,98.500],['Материк',8.290,98.380]];
 
 const f2 = p => p[0].toFixed(2) + ',' + p[1].toFixed(2);
@@ -737,6 +905,7 @@ const ISLAND = boundsOf(COAST);
 const villaBounds = () => boundsOf([...VILLAS.map(v => [v.lat, v.lng]), [7.8961, 98.2960]]);
 
 const LAY = store.get('phk-layers', { villas:true, favOnly:false, beach:true, sight:true, night:true, shop:false, transport:true });
+LAY.villas = true; LAY.favOnly = false;
 let map = null, sel = null, tipId = null, items = [], fitted = false, lastW = 0, lastH = 0, raf = 0, anim = 0;
 const V = { k: 20, tx: 0, ty: 0 };
 const KMIN = 4, KMAX = 600, clampK = k => Math.max(KMIN, Math.min(KMAX, k));
@@ -750,7 +919,9 @@ function worldSVG(){
     <path class="main" d="${poly(MAINLAND)}"/>
     <path class="roadE" ${ns} d="M${f2(P(8.197, 98.300))}L${f2(P(8.211, 98.300))}"/>
     <path class="land" ${ns} d="${coast}"/>
-    <g clip-path="url(#isl)">${hills}</g>
+    <g clip-path="url(#isl)">${hills}
+      <path class="zoneP" ${ns} d="${curve(ZONE.district, true)}"/>
+      <ellipse class="zoneC" cx="${P(ZONE.center[0], ZONE.center[1])[0].toFixed(2)}" cy="${P(ZONE.center[0], ZONE.center[1])[1].toFixed(2)}" rx="${ZONE.center[2]}" ry="${ZONE.center[3]}"/></g>
     ${roads.map(d => `<path class="roadE" ${ns} d="${d}"/>`).join('')}
     ${roads.map(d => `<path class="road" ${ns} d="${d}"/>`).join('')}`;
 }
@@ -802,18 +973,19 @@ function clampView(W, H){
 
 function drawVillas(){
   if(!map) return;
-  const vs = (LAY.favOnly ? VILLAS.filter(v => favs.includes(v.id)) : LAY.villas ? filtered() : []).slice();
+  const vs = (LAY.favOnly ? VILLAS.filter(v => favs.includes(v.id)) : LAY.villas ? VILLAS : []).slice();
   if(sel && !vs.some(v => v.id === sel)){ const s = VILLAS.find(v => v.id === sel); if(s) vs.push(s); }
   vs.sort((a, b) => (a.id === sel) - (b.id === sel));
   const PR = { beach: 5, sight: 5, transport: 4, night: 3, shop: 2 }, MINK = { beach: 7, sight: 7, transport: 5, night: 22, shop: 22 };
   const ps = PLACES.filter(p => LAY[p.type]).sort((a, b) => PR[b.type] - PR[a.type]);
   const defs = [
     ...SEAS.map(([n, la, lo]) => ({ kind: 'area', minK: 0, xy: P(la, lo), html: `<div class="mk"><span class="al sea">${esc(n)}</span></div>` })),
+    { kind: 'zone', minK: 9, xy: P(ZONE.label[0], ZONE.label[1]), html: `<div class="mk"><span class="al zone">${esc(ZONE.name)}</span></div>` },
     ...ps.map(p => ({ kind: 'poi', id: p.id, minK: MINK[p.type], side: p.type === 'beach' ? 'l' : 'r', xy: P(p.lat, p.lng),
       html: `<div class="mk" data-pid="${p.id}"><div class="ppin" style="background:${CAT[p.type].color}"><svg viewBox="0 0 24 24">${CAT[p.type].svg}</svg></div><span class="pl r">${esc(p.name)}</span></div>` })),
     ...AREAS.map(([n, la, lo]) => ({ kind: 'area', minK: 6, xy: P(la, lo), html: `<div class="mk"><span class="al">${esc(n)}</span></div>` })),
     ...vs.map(v => ({ kind: 'villa', xy: P(v.lat, v.lng),
-      html: `<div class="mk" data-vid="${v.id}"><div class="vpin ${v.approx ? 'apx' : ''} ${v.id === sel ? 'sel' : favs.includes(v.id) ? 'fav' : ''}">${favs.includes(v.id) ? '♥ ' : ''}${v.approx ? '≈ ' : ''}${Math.round(v.thb / 1000)} тыс ฿</div></div>` }))
+      html: `<div class="mk" data-vid="${v.id}"><i class="vline"></i><i class="vdot"></i><div class="vpin ${v.approx ? 'apx' : ''} ${v.id === sel ? 'sel' : favs.includes(v.id) ? 'fav' : ''}">${favs.includes(v.id) ? '♥ ' : ''}${v.approx ? '≈ ' : ''}${Math.round(v.thb / 1000)} тыс ฿</div></div>` }))
   ];
   const tp = tipId && PLACES.find(p => p.id === tipId && LAY[p.type]);
   if(!tp) tipId = null;
@@ -822,7 +994,7 @@ function drawVillas(){
   mk.innerHTML = defs.map(d => d.html).join('') + tipHTML;
   items = defs.map((d, i) => {
     const el = mk.children[i], it = { ...d, x: d.xy[0], y: d.xy[1], el };
-    if(d.kind === 'villa'){ it.w = el.firstChild.offsetWidth; it.h = el.firstChild.offsetHeight + 7; }
+    if(d.kind === 'villa'){ it.pin = el.querySelector('.vpin'); it.line = el.querySelector('.vline'); it.w = it.pin.offsetWidth; it.h = it.pin.offsetHeight + 7; }
     else { it.lab = el.querySelector('.pl,.al'); it.lw = it.lab.offsetWidth; }
     if(d.kind === 'poi' && d.id === tipId) it.tip = true;
     return it;
@@ -836,23 +1008,47 @@ function doRender(){
   clampView(W, H);
   const world = $('#world'); if(!world) return;
   world.setAttribute('transform', `translate(${V.tx.toFixed(1)} ${V.ty.toFixed(1)}) scale(${V.k.toFixed(4)})`);
-  const small = V.k < 14; $('#mk').classList.toggle('small', small);
+  const small = V.k < 6; $('#mk').classList.toggle('small', small);
   const placed = [], hit = b => placed.some(o => b[0] < o[2] && b[2] > o[0] && b[1] < o[3] && b[3] > o[1]);
   const off = b => b[0] < 2 || b[2] > W - 2 || b[1] < 2 || b[3] > H - 2;
   for(const it of items){
     it.sx = it.x * V.k + V.tx; it.sy = it.y * V.k + V.ty;
-    it.el.style.transform = `translate(${it.sx.toFixed(1)}px,${it.sy.toFixed(1)}px)`;
-    if(it.kind === 'villa') placed.push(small ? [it.sx - 9, it.sy - 9, it.sx + 9, it.sy + 9] : [it.sx - it.w / 2 - 2, it.sy - it.h - 2, it.sx + it.w / 2 + 2, it.sy]);
-    if(it.kind === 'poi') placed.push([it.sx - 13, it.sy - 13, it.sx + 13, it.sy + 13]);
+    it.el.style.left = it.sx.toFixed(1) + 'px'; it.el.style.top = it.sy.toFixed(1) + 'px';
+    if(it.kind === 'villa'){
+      let cx = 0, cy = 0, b;
+      if(small) b = [it.sx - 9, it.sy - 9, it.sx + 9, it.sy + 9];
+      else {
+        const w = it.w, h = it.h, C = [[0, -h / 2]];
+        for(const ring of [0, 1, 2]) for(const a of [-90, -40, -140, 0, 180, 40, 140, 90]){
+          const r = a * Math.PI / 180;
+          C.push([Math.cos(r) * (w / 2 + 14 + ring * 26), -h / 2 + Math.sin(r) * (h + 10 + ring * (h + 6)) + (a > 0 ? h / 2 : 0)]);
+        }
+        for([cx, cy] of C){
+          b = [it.sx + cx - w / 2 - 2, it.sy + cy - h / 2 - 2, it.sx + cx + w / 2 + 2, it.sy + cy + h / 2 + 2];
+          if(!placed.some(o => o.v && b[0] < o[2] && b[2] > o[0] && b[1] < o[3] && b[3] > o[1])) break;
+        }
+      }
+      const moved = !small && (cx !== 0 || cy !== -it.h / 2);
+      it.pin.style.marginLeft = small ? '' : cx + 'px'; it.pin.style.marginTop = small ? '' : (cy + it.h / 2) + 'px';
+      it.pin.classList.toggle('side', moved);
+      const L = moved ? Math.hypot(cx, cy) : 0;
+      it.line.style.width = L + 'px'; it.line.style.transform = `rotate(${Math.atan2(cy, cx)}rad)`;
+      b.v = true; placed.push(b);
+    }
+    if(it.kind === 'poi') placed.push([it.sx - 11, it.sy - 11, it.sx + 11, it.sy + 11]);
   }
   for(const it of items){
     if(!it.lab) continue;
     const { sx, sy } = it;
     if(it.kind === 'poi'){
-      const L = [sx - 15 - it.lw, sy - 9, sx - 15, sy + 9], R = [sx + 15, sy - 9, sx + 15 + it.lw, sy + 9];
+      const L = [sx - 13 - it.lw, sy - 8, sx - 13, sy + 8], R = [sx + 13, sy - 8, sx + 13 + it.lw, sy + 8];
       const ok = V.k >= it.minK ? (it.side === 'l' ? [L, R] : [R, L]).find(b => !off(b) && !hit(b)) : null;
       it.lab.classList.toggle('hide', !ok);
       if(ok){ placed.push(ok); it.lab.classList.toggle('l', ok === L); it.lab.classList.toggle('r', ok === R); }
+    } else if(it.kind === 'zone'){
+      const c = V.k >= it.minK ? [[0, 0], [0, 24], [0, -24], [it.lw / 2 + 30, 0], [-it.lw / 2 - 30, 0], [0, 48], [0, 72], [it.lw / 2 + 60, 20], [it.lw / 2 + 60, -20], [0, 96]].map(([dx, dy]) => [sx + dx - it.lw / 2, sy + dy - 11, sx + dx + it.lw / 2, sy + dy + 11, dx, dy]).find(b => !off(b) && !hit(b)) : null;
+      it.lab.classList.toggle('hide', !c);
+      if(c){ placed.push(c); it.lab.style.marginLeft = c[4] + 'px'; it.lab.style.marginTop = c[5] + 'px'; }
     } else {
       const b = [sx - it.lw / 2, sy - 10, sx + it.lw / 2, sy + 10];
       const ok = V.k >= it.minK && !hit(b) && !off(b);
@@ -860,7 +1056,7 @@ function doRender(){
     }
   }
   const tip = $('#tipmk'), tp = tipId && items.find(i => i.id === tipId);
-  if(tip && tp) tip.style.transform = `translate(${tp.sx.toFixed(1)}px,${tp.sy.toFixed(1)}px)`;
+  if(tip && tp){ tip.style.left = tp.sx.toFixed(1) + 'px'; tip.style.top = tp.sy.toFixed(1) + 'px'; tip.style.zIndex = 20; }
   const km1 = 100 / V.k, nice = [0.1, 0.2, 0.5, 1, 2, 5, 10, 20].reduce((a, n) => n <= km1 ? n : a, 0.1);
   $('#scale i').style.width = (nice * V.k).toFixed(0) + 'px';
   $('#scale span').textContent = nice < 1 ? (nice * 1000) + ' м' : nice + ' км';
@@ -961,12 +1157,16 @@ function refreshAll(){
 }
 
 document.addEventListener('click', e => {
-  const el = e.target.closest('[data-fav],[data-open],[data-close],[data-tab],[data-area],[data-flag],[data-reset],[data-mv],[data-layer],[data-onmap],[data-unpeek],[data-zoom],[data-fit],[data-askclose],[data-ext]');
+  const el = e.target.closest('[data-fav],[data-open],[data-close],[data-tab],[data-area],[data-flag],[data-reset],[data-mv],[data-layer],[data-onmap],[data-unpeek],[data-zoom],[data-fit],[data-askclose],[data-pedit],[data-pmv],[data-pcover],[data-pdel],[data-ghclose],[data-ghlogout],[data-ext]');
   if(!el) return;
   const d = el.dataset;
   if('fav' in d){ e.stopPropagation(); toggleFav(d.fav); }
   else if('open' in d) openSheet(d.open);
   else if('close' in d) closeSheet();
+  else if('pedit' in d){ editOpen = !editOpen; reopenSheet(); }
+  else if('pmv' in d || 'pcover' in d || 'pdel' in d) photoAction(d, el);
+  else if('ghclose' in d) $('#ghd').classList.remove('on');
+  else if('ghlogout' in d){ store.set('phk-gh', ''); renderAdmin(); if(openId) reopenSheet(); toast('Режим редактирования выключен'); }
   else if('askclose' in d){ pendingLike = null; $('#ask').classList.remove('on'); }
   else if('tab' in d){ closeSheet(); setTab(d.tab); }
   else if('area' in d){ F.area = d.area; store.set('phk-filter', F); renderFilters(); renderList(); drawVillas(); }
@@ -983,7 +1183,7 @@ document.addEventListener('click', e => {
 $('#sort').addEventListener('change', e => { F.sort = e.target.value; store.set('phk-filter', F); renderList(); });
 document.addEventListener('keydown', e => { if(e.key === 'Escape' && openId) closeSheet(); });
 
-renderFilters(); renderList(); renderFav(); renderLayers();
+renderFilters(); renderList(); renderFav(); renderLayers(); renderAdmin(); loadPhotoMeta();
 if(syncId()){ pull(); setInterval(() => { if(!document.hidden) pull(); }, 15000); }
 document.addEventListener('visibilitychange', () => { if(!document.hidden && syncId()) pull(); });
 }
