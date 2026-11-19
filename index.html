@@ -280,6 +280,12 @@ const VILLAS = [
     link:'https://drive.google.com/drive/folders/1ZAo-y9fICq3XCMV9JzOyXpmEtpOIEBLE', linkText:'Все фото на Google Диске',
     map:'https://maps.app.goo.gl/aeYUno2LHy1DUsgj7',
     desc:'Вилла с тремя спальнями на Чалонге, рядом с районом Ката. По фото — свой бассейн во дворе за забором, раздвижные двери из гостиной прямо к воде.' },
+  { id:'patong-urban-oasis', name:'Urban Oasis Villa', area:'Патонг', lat:7.8932, lng:98.3045, approx:true, approxText:'точная геолокация уточняется',
+    priceThb:227000, bedrooms:4, pool:true, poolNote:'свой, с джакузи',
+    photos:[], link:'https://amo.si/K/ZTQFJO/ZOO2OO', linkText:'Объявление и фото (ссылка 1)', link2:'https://amo.si/K/ZTIZ4A/ZOGSUY', link2Text:'Объявление и фото (ссылка 2)',
+    desc:'Вилла с 4 спальнями, приватным бассейном и джакузи в Патонге.',
+    amenities:['Свой бассейн','Джакузи'],
+    note:'Точная геолокация уточняется — точка на карте примерная.' },
   { id:'patong-4br', name:'Вилла на 4 спальни у пляжа Патонг', area:'Патонг', lat:7.8984, lng:98.2998, approx:true, approxText:'точная геолокация уточняется',
     priceThb:256000, bedrooms:4, baths:4, beds:'3 двуспальные (1,9 × 2 м) и 2 односпальные', guests:8, pool:true, poolNote:'свой, с водопадом',
     seaText:'на пляже Патонг', photos:[],
@@ -577,6 +583,7 @@ function openSheet(id){
     <ul class="near">${near.map(n => `<li><span><i style="background:${CAT[n.p.type].color}"></i>${esc(n.p.name)}</span><b>${km(n.d)}</b></li>`).join('')}</ul>
     <div class="acts" style="padding:18px 0 0">
       ${v.link ? `<a class="btn p" data-ext href="${esc(v.link)}" target="_blank" rel="noopener">${esc(v.linkText || 'Открыть объявление')}<svg class="i"><use href="#i-ext"/></svg></a>` : ''}
+      ${v.link2 ? `<a class="btn p" data-ext href="${esc(v.link2)}" target="_blank" rel="noopener">${esc(v.link2Text || 'Ещё ссылка')}<svg class="i"><use href="#i-ext"/></svg></a>` : ''}
       <button class="btn" data-onmap="${v.id}"><svg class="i"><use href="#i-map"/></svg>На карте</button>
       <a class="btn ${v.link ? '' : 'p'}" data-ext href="${esc(v.map || gm)}" target="_blank" rel="noopener">${v.map ? 'Локация в Google Maps' : v.approx ? 'Район в Google Maps' : 'Google Maps'}</a>
     </div>
