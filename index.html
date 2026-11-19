@@ -270,7 +270,7 @@ const VILLAS = [
     priceThb:240000, bedrooms:null, pool:true, poolNote:'во дворе',
     photos:['photos/patong-240-01.jpg','photos/patong-240-02.jpg','photos/patong-240-03.jpg','photos/patong-240-04.jpg','photos/patong-240-05.jpg','photos/patong-240-06.jpg','photos/patong-240-07.jpg'], map:'https://maps.app.goo.gl/tZDzbiknyEa6KzKE7',
     desc:'По фото: бассейн во дворе с шезлонгами, большая гостиная, кухня с островом, бильярд, общая терраса.' },
-  { id:'patong-4br', name:'Вилла на 4 спальни у пляжа Патонг', area:'Патонг', lat:7.8992, lng:98.2972, approx:true,
+  { id:'patong-4br', name:'Вилла на 4 спальни у пляжа Патонг', area:'Патонг', lat:7.8984, lng:98.2998, approx:true, approxText:'точная геолокация уточняется',
     priceThb:256000, bedrooms:4, baths:4, beds:'3 двуспальные (1,9 × 2 м) и 2 односпальные', guests:8, pool:true, poolNote:'свой, с водопадом',
     seaText:'на пляже Патонг', photos:[],
     desc:'Вилла с собственным бассейном во дворе и шезлонгами рядом. Водопад в бассейне включают не каждый день (экономят энергию), но персонал запустит его по просьбе в любое время.',
@@ -281,7 +281,7 @@ const VILLAS = [
       '2-й этаж: спальня с двумя односпальными кроватями (по 1 м) и своей ванной с душем',
       'Две кладовые недоступны гостям'],
     amenities:['Свой бассейн с водопадом','Шезлонги','ТВ 70″','Кухня','Обеденная зона','Стиральная машина','Гардеробная','Рабочая зона'],
-    note:'Цена предварительная — 256 000 ฿ за весь период.' }
+    note:'Точная геолокация уточняется — точка на карте примерная. Цена предварительная — 256 000 ฿ за весь период.' }
 ];
 
 const PLACES = [
@@ -554,7 +554,7 @@ function openSheet(id){
     ${v.amenities && v.amenities.length ? `<h4>Удобства</h4><div class="am">${v.amenities.map(a => `<span>${esc(a)}</span>`).join('')}</div>` : ''}
     ${(v.pros && v.pros.length) || (v.cons && v.cons.length) ? `<div class="pc"><div><h4>Плюсы</h4><ul>${(v.pros || []).map(x => `<li>${esc(x)}</li>`).join('') || '<li>—</li>'}</ul></div>
       <div><h4>Минусы</h4><ul>${(v.cons || []).map(x => `<li>${esc(x)}</li>`).join('') || '<li>—</li>'}</ul></div></div>` : ''}
-    <h4>Что рядом (по прямой)${v.approx ? ' — точка примерная, в объявлении только район' : ''}</h4>
+    <h4>Что рядом (по прямой)${v.approx ? ' — ' + (v.approxText || 'точка примерная, в объявлении только район') : ''}</h4>
     <ul class="near">${near.map(n => `<li><span><i style="background:${CAT[n.p.type].color}"></i>${esc(n.p.name)}</span><b>${km(n.d)}</b></li>`).join('')}</ul>
     <div class="acts" style="padding:18px 0 0">
       ${v.link ? `<a class="btn p" data-ext href="${esc(v.link)}" target="_blank" rel="noopener">${esc(v.linkText || 'Открыть объявление')}<svg class="i"><use href="#i-ext"/></svg></a>` : ''}
@@ -1166,7 +1166,7 @@ function selectVilla(id, zoom){
   const v = VILLAS.find(x => x.id === id); if(!v) return;
   sel = id; tipId = null; drawVillas();
   $('#peek').innerHTML = `<img src="${esc(v.imgs[0])}" alt=""><div><h3>${esc(v.name)}</h3>
-    <div class="area">${esc(v.area)} · ${seaTxt(v)}${v.approx ? ' · точка примерная' : ''}</div><div style="margin-top:4px;font-size:14px"><b>${thb(v.thb)}</b> ≈ ${rub(v.total)} · ${rub(v.pp)} с чел.</div>
+    <div class="area">${esc(v.area)} · ${seaTxt(v)}${v.approx ? ' · ' + (v.approxText || 'точка примерная') : ''}</div><div style="margin-top:4px;font-size:14px"><b>${thb(v.thb)}</b> ≈ ${rub(v.total)} · ${rub(v.pp)} с чел.</div>
     <button class="chip" data-open="${v.id}" style="margin-top:8px;min-height:34px;padding:6px 12px">Подробнее</button></div>
     <button class="x" data-unpeek aria-label="Закрыть" style="width:30px;height:30px"><svg class="i" style="width:16px;height:16px"><use href="#i-x"/></svg></button>`;
   $('#peek').classList.add('on'); syncMapUI();
