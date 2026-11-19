@@ -74,6 +74,7 @@ nav.tabs em:empty{display:none}
 .price small{max-width:13em;white-space:normal}
 .tot{flex-wrap:wrap}
 .pbox em{display:block;font-style:normal;color:var(--mute);font-size:13px;white-space:nowrap}
+.lay{margin:0;padding-left:18px;font-size:14px;display:grid;gap:4px}
 .rate{font-size:12px;color:var(--mute);margin:6px 0 0}
 .lk{display:flex;align-items:center;gap:8px;margin-top:12px;font-size:13px;color:var(--mute);min-height:26px}
 .lk .av{display:flex}.lk .av b{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;color:#fff;font-size:12px;font-weight:800;border:2px solid var(--card);margin-left:-8px}
@@ -261,7 +262,19 @@ const VILLAS = [
   { id:'patong-240', name:'Вилла с бассейном и бильярдом', area:'Патонг', lat:7.895118, lng:98.300960,
     priceThb:240000, bedrooms:null, pool:true, poolNote:'во дворе',
     photos:['photos/patong-240-01.jpg','photos/patong-240-02.jpg','photos/patong-240-03.jpg','photos/patong-240-04.jpg','photos/patong-240-05.jpg','photos/patong-240-06.jpg','photos/patong-240-07.jpg'], map:'https://maps.app.goo.gl/tZDzbiknyEa6KzKE7',
-    desc:'По фото: бассейн во дворе с шезлонгами, большая гостиная, кухня с островом, бильярд, общая терраса.' }
+    desc:'По фото: бассейн во дворе с шезлонгами, большая гостиная, кухня с островом, бильярд, общая терраса.' },
+  { id:'patong-4br', name:'Вилла на 4 спальни у пляжа Патонг', area:'Патонг', lat:7.8992, lng:98.2972, approx:true,
+    priceThb:256000, bedrooms:4, baths:4, beds:'3 двуспальные (1,9 × 2 м) и 2 односпальные', guests:8, pool:true, poolNote:'свой, с водопадом',
+    seaText:'на пляже Патонг', photos:[],
+    desc:'Вилла с собственным бассейном во дворе и шезлонгами рядом. Водопад в бассейне включают не каждый день (экономят энергию), но персонал запустит его по просьбе в любое время.',
+    layout:['1-й этаж: просторная гостиная с телевизором 70″, компактная кухня, отдельная обеденная зона, стиральная машина, гостевой туалет без душа',
+      '1-й этаж: спальня с двуспальной кроватью 1,9 × 2 м и своей ванной с душем',
+      '2-й этаж: главная спальня — двуспальная кровать 1,9 × 2 м, рабочая зона, гардеробная, своя ванная с ванной и отдельным душем',
+      '2-й этаж: спальня с двуспальной кроватью 1,9 × 2 м и своей ванной с душем',
+      '2-й этаж: спальня с двумя односпальными кроватями (по 1 м) и своей ванной с душем',
+      'Две кладовые недоступны гостям'],
+    amenities:['Свой бассейн с водопадом','Шезлонги','ТВ 70″','Кухня','Обеденная зона','Стиральная машина','Гардеробная','Рабочая зона'],
+    note:'Цена предварительная — 256 000 ฿ за весь период.' }
 ];
 
 const PLACES = [
@@ -431,14 +444,16 @@ VILLAS.forEach((v, idx) => {
   v.nightThb = v.priceThb / TRIP.nights; v.night = v.total / TRIP.nights;
   v.pp = v.total / TRIP.people;
   const nb = beaches.map(b => ({ b, d: dist(v, b) })).sort((a, b) => a.d - b.d)[0];
-  v.beach = v.seaM != null ? v.seaM / 1000 : nb ? nb.d : 99;
+  v.beach = v.seaText ? 0.1 : v.seaM != null ? v.seaM / 1000 : nb ? nb.d : 99;
   v.toBangla = bangla ? dist(v, bangla) : null;
   v.fit = v.pp <= TRIP.ppMax ? 'ok' : v.pp <= TRIP.ppMax * 1.1 ? 'mid' : 'over';
 });
-const seaTxt = v => v.seaM != null ? km(v.seaM / 1000) + ' до моря' : '≈\u00a0' + km(v.beach) + ' до пляжа';
+const seaTxt = v => v.seaText ? v.seaText : v.seaM != null ? km(v.seaM / 1000) + ' до моря' : '≈\u00a0' + km(v.beach) + ' до пляжа';
 function facts(v, full){
   const f = [v.bedrooms ? `${v.bedrooms} спальни` : 'спальни — уточнить'];
   if(full && v.baths) f.push(`${v.baths} ванные`);
+  if(full && typeof v.beds === 'string') f.push('Кровати: ' + v.beds);
+  if(v.guests) f.push(`до ${v.guests} гостей`);
   if(v.pool) f.push('Бассейн' + (v.poolNote ? ': ' + v.poolNote : ''));
   return f.map(x => `<li>${esc(x)}</li>`).join('');
 }
@@ -524,6 +539,7 @@ function openSheet(id){
     <ul class="facts">${facts(v, true)}</ul>
     <h4>Кому нравится</h4><div class="lk" data-lk="${v.id}" data-full="1" style="margin-top:0">${likersHTML(v.id, true)}</div>
     ${v.desc ? `<p class="desc">${esc(v.desc)}</p>` : ''}
+    ${v.layout && v.layout.length ? `<h4>Планировка</h4><ul class="lay">${v.layout.map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : ''}
     ${v.note ? `<div class="note"><b>Заметка:</b> ${esc(v.note)}</div>` : ''}
     ${v.amenities && v.amenities.length ? `<h4>Удобства</h4><div class="am">${v.amenities.map(a => `<span>${esc(a)}</span>`).join('')}</div>` : ''}
     ${(v.pros && v.pros.length) || (v.cons && v.cons.length) ? `<div class="pc"><div><h4>Плюсы</h4><ul>${(v.pros || []).map(x => `<li>${esc(x)}</li>`).join('') || '<li>—</li>'}</ul></div>
