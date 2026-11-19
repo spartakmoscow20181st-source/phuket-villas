@@ -70,6 +70,27 @@ nav.tabs button.on{color:var(--sea)}
 :root[data-theme=dark] nav.tabs button.on{color:#5fd0c8}
 nav.tabs em{position:absolute;top:8px;left:calc(50% + 6px);background:var(--coral);color:#fff;font-style:normal;font-size:11px;min-width:18px;height:18px;border-radius:9px;display:grid;place-items:center;padding:0 5px}
 nav.tabs em:empty{display:none}
+/* цены, лайки */
+.price small{max-width:13em;white-space:normal}
+.tot{flex-wrap:wrap}
+.pbox em{display:block;font-style:normal;color:var(--mute);font-size:13px;white-space:nowrap}
+.rate{font-size:12px;color:var(--mute);margin:6px 0 0}
+.lk{display:flex;align-items:center;gap:8px;margin-top:12px;font-size:13px;color:var(--mute);min-height:26px}
+.lk .av{display:flex}.lk .av b{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;color:#fff;font-size:12px;font-weight:800;border:2px solid var(--card);margin-left:-8px}
+.lk .av b:first-child{margin-left:0}
+.lk span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.heart em{position:absolute;top:-4px;right:-4px;min-width:20px;height:20px;border-radius:10px;background:var(--coral);color:#fff;font:800 11px/20px Manrope,sans-serif;font-style:normal;padding:0 5px}
+.heart em:empty{display:none}
+.rk{display:grid;gap:8px}
+.rk>div{display:grid;grid-template-columns:34px minmax(0,1fr) auto;gap:10px;align-items:center;background:var(--card);border-radius:14px;padding:10px;cursor:pointer}
+.rk .c{font:700 18px Unbounded,sans-serif;color:var(--coral);text-align:center}
+.rk h3{font-size:14px}.rk small{color:var(--mute);font-size:13px;display:block}
+.st{font-size:13px;color:var(--mute);margin:0 0 4px}
+.setup{background:var(--card);border-radius:16px;padding:14px;margin-top:10px}
+.setup code{display:block;background:var(--soft);border-radius:8px;padding:8px;margin:8px 0;font-size:13px;word-break:break-all}
+#ask .askb{position:absolute;left:16px;right:16px;top:28%;background:var(--card);border-radius:20px;padding:20px;max-width:420px;margin:0 auto;display:grid;gap:12px}
+#ask p{margin:0;color:var(--mute);font-size:14px}
+.vpin.apx{border-style:dashed}
 /* карта — условная схема */
 :root{--seaM:#bfe2e8;--land:#f5f0e1;--coast:#ffffff;--hill:#d3e6c2;--road:#ffffff;--roadE:#d8ceb0;--lab:#4a6064;--seaL:#3f8794}
 :root[data-theme=dark]{--seaM:#08202a;--land:#22342f;--coast:#3a5a55;--hill:#2a4335;--road:#415a55;--roadE:#2a403c;--lab:#9fb6b5;--seaL:#5fa9b3}
@@ -181,60 +202,49 @@ h4{margin:22px 0 8px;font-size:15px}
 <script>
 /* =====================================================================
    ДАННЫЕ. Всё, что нужно поменять, — здесь.
-   TRIP   — параметры поездки (ночи и бюджет нужны для расчёта цен).
-   VILLAS — варианты жилья. photos: список URL картинок; пустой список → заглушки.
-            priceTotal: итоговая сумма за весь период, если известна (важнее pricePerNight).
-   PLACES — туристические места на карте. type: beach | sight | night | transport | shop
-   Ниже — ДЕМО-объекты: названия, цены, фото и ссылки выдуманы.
+   TRIP   — поездка: ночи, на сколько человек делим цену, бюджет, курс бата.
+   SYNC   — общие лайки (хранилище на jsonblob.com, номер создаётся один раз: страница с #setup).
+   VILLAS — варианты. priceThb — цена за весь период в батах. photos — список картинок
+            (пустой → заглушка). approx:true — точка на карте примерная.
+   PLACES — места на карте. type: beach | sight | night | transport | shop
    ===================================================================== */
 const TRIP = {
   title: 'Где живём на Пхукете',
   dates: '27 дек – 7 янв',
   nights: 11,
-  guests: 6,
+  people: 5,
   budgetMin: 450000,
   budgetMax: 500000,
-  cur: '₽'
+  rate: 2.3967,
+  rateNote: 'курсу ЦБ РФ на 3 ноября 2026'
 };
+const SYNC = { api: 'https://jsonblob.com/api/jsonBlob/', id: '' };
 
 const VILLAS = [
-  { id:'v1', name:'Villa Baan Kaew', area:'Патонг', lat:7.9052, lng:98.3022,
-    pricePerNight:38000, priceTotal:null, bedrooms:3, beds:3, baths:3, guests:8, pool:true,
-    rating:4.9, reviews:87, source:'Airbnb', link:'https://www.airbnb.com/s/Patong--Phuket',
-    photos:[], desc:'Вилла на склоне над Калимом: панорамная терраса, свой бассейн 4×8 м, три спальни с ванными. До Bangla Road — 10 минут на такси.',
-    amenities:['Свой бассейн','Вид на море','Кухня','Wi‑Fi','Кондиционеры','Парковка','Уборка 2 раза в неделю'],
-    pros:['Вид на залив, салют на Новый год с террасы','Тихо, но близко к центру'], cons:['Крутой подъём — пешком тяжело'],
-    note:'Хозяин готов дать скидку 7% при оплате до 1 декабря.' },
-  { id:'v2', name:'Patong Hillside Pool Villa', area:'Патонг', lat:7.8885, lng:98.3058,
-    pricePerNight:41000, priceTotal:null, bedrooms:3, beds:4, baths:3, guests:8, pool:true,
-    rating:4.8, reviews:132, source:'Booking', link:'https://www.booking.com/searchresults.html?ss=Patong',
-    photos:[], desc:'Современная вилла в закрытом посёлке с охраной. Бассейн с джакузи, барбекю-зона, большая гостиная с выходом к воде.',
-    amenities:['Свой бассейн','Джакузи','Барбекю','Охрана','Wi‑Fi','Стиральная машина'],
-    pros:['Охраняемая территория','Много отзывов, высокий рейтинг'], cons:['Вида на море нет'], note:'' },
-  { id:'v3', name:'Tamarind House', area:'Патонг', lat:7.8992, lng:98.2998,
-    pricePerNight:47000, priceTotal:null, bedrooms:4, beds:4, baths:4, guests:10, pool:true,
-    rating:4.7, reviews:41, source:'Airbnb', link:'https://www.airbnb.com/s/Patong--Phuket',
-    photos:[], desc:'Большая вилла в пешей доступности от пляжа Патонг. Четыре спальни — можно разместить до 10 человек.',
-    amenities:['Свой бассейн','Пешком до пляжа','Кухня','Wi‑Fi','Кондиционеры'],
-    pros:['До пляжа пешком','Четвёртая спальня — запас'], cons:['Дороже бюджета','Шумно ночью'], note:'' },
-  { id:'v4', name:'Karon Sea Breeze', area:'Карон', lat:7.8425, lng:98.3010,
-    pricePerNight:36000, priceTotal:null, bedrooms:3, beds:3, baths:2, guests:6, pool:true,
-    rating:4.9, reviews:64, source:'Airbnb', link:'https://www.airbnb.com/s/Karon--Phuket',
-    photos:[], desc:'Уютная вилла на холме над Кароном: инфинити-бассейн и закаты над Андаманским морем.',
-    amenities:['Инфинити-бассейн','Вид на море','Кухня','Wi‑Fi','Парковка'],
-    pros:['Самый красивый вид','Дешевле аналогов в Патонге'], cons:['Ровно 6 мест','До Патонга 20 минут'], note:'' },
-  { id:'v5', name:'Kata Garden Villa', area:'Ката', lat:7.8178, lng:98.3035,
-    pricePerNight:33000, priceTotal:null, bedrooms:3, beds:3, baths:3, guests:7, pool:true,
-    rating:4.6, reviews:29, source:'Booking', link:'https://www.booking.com/searchresults.html?ss=Kata+Beach',
-    photos:[], desc:'Вилла в тропическом саду в 800 м от пляжа Ката. Спокойный район, хорош для отдыха днём.',
-    amenities:['Свой бассейн','Сад','Кухня','Wi‑Fi','Велосипеды'],
-    pros:['Самая выгодная','Спокойно, рядом лучшие пляжи'], cons:['Далеко от ночной жизни'], note:'' },
-  { id:'v6', name:'Kamala Ocean Villa', area:'Камала', lat:7.9505, lng:98.2885,
-    pricePerNight:44000, priceTotal:470000, bedrooms:3, beds:3, baths:3, guests:8, pool:true,
-    rating:5.0, reviews:18, source:'Airbnb', link:'https://www.airbnb.com/s/Kamala--Phuket',
-    photos:[], desc:'Новая вилла у пляжа Камала, рядом Phuket FantaSea и Café del Mar. Итоговая цена со скидкой за длительное проживание.',
-    amenities:['Свой бассейн','Рядом пляж','Кухня','Wi‑Fi','Тренажёр'],
-    pros:['Новая','Скидка за 11 ночей'], cons:['Мало отзывов'], note:'Цена уже со скидкой — подтверждена в переписке.' }
+  { id:'patong-hill', name:'Дом на холме, три уровня', area:'Патонг', lat:7.8900, lng:98.2990, approx:true,
+    priceThb:258000, bedrooms:3, seaM:750, pool:null,
+    photos:[], link:'https://kommo.cc/K/YXINY6/YR9I1O', linkText:'Фото и объявление',
+    desc:'Современный трёхуровневый дом на склоне холма с видом на залив Патонг со всех этажей. Три спальни, главная — с балконом и джакузи с видом на море, гостиная с кухней и большая тенистая терраса.',
+    amenities:['Вид на залив','Джакузи в главной спальне','Терраса','Посудомоечная машина','Стиральная машина','Бесплатная парковка'] },
+  { id:'chalong-thai', name:'Тайская вилла 300 м²', area:'Чалонг', lat:7.8290, lng:98.3500, approx:true,
+    priceThb:129000, bedrooms:3, baths:3, seaM:600, pool:true, poolNote:'свой, 8 м',
+    photos:[], link:'https://kommo.cc/K/YXINYE/YR9I1S', linkText:'Фото и объявление',
+    desc:'Просторная вилла в тайском стиле площадью 300 м² с собственным 8-метровым бассейном и шезлонгами. Три спальни с отдельными ванными, гостиная со Smart TV, обеденная зона и хорошо оборудованная кухня.',
+    amenities:['Свой бассейн 8 м','Шезлонги','Smart TV','Кухня','Стиральная машина','Бесплатная парковка'] },
+  { id:'naithon-zen', name:'Вилла в японском стиле', area:'Найтон', lat:8.0470, lng:98.2930, approx:true,
+    priceThb:115000, bedrooms:3, seaM:10300, pool:true, poolNote:'общий',
+    photos:[], link:'https://kommo.cc/K/YXINYG/YR9I1U', linkText:'Фото и объявление',
+    desc:'Вилла с японскими мотивами в новом комплексе среди каучукового леса. Три спальни, гостиная со Smart TV, полностью оборудованная открытая кухня и дзен-сад за домом. Гостям доступен общий бассейн.',
+    amenities:['Общий бассейн','Дзен-сад','Smart TV','Открытая кухня','Стиральная машина','Бесплатная парковка'],
+    note:'В объявлении — «10 300 м до моря». Для Найтона это странно, возможно опечатка: стоит уточнить.' },
+  { id:'patong-v2', name:'Вариант 2: дом с видом на залив', area:'Патонг', lat:7.906435, lng:98.302244,
+    priceThb:225000, bedrooms:3, pool:null,
+    photos:['photos/patong-v2-01.jpg','photos/patong-v2-02.jpg','photos/patong-v2-03.jpg','photos/patong-v2-04.jpg','photos/patong-v2-05.jpg','photos/patong-v2-06.jpg','photos/patong-v2-07.jpg','photos/patong-v2-08.jpg','photos/patong-v2-09.jpg','photos/patong-v2-10.jpg','photos/patong-v2-11.jpg','photos/patong-v2-12.jpg','photos/patong-v2-13.jpg'], map:'https://maps.app.goo.gl/vZxEZpacdcthKVqm8',
+    desc:'По фото: дом на склоне с видом на залив Патонг, несколько уровней, панорамные окна, терраса с шезлонгами и подвесным креслом, ванна-джакузи у окна.' },
+  { id:'patong-240', name:'Вилла с бассейном и бильярдом', area:'Патонг', lat:7.895118, lng:98.300960,
+    priceThb:240000, bedrooms:null, pool:true, poolNote:'во дворе',
+    photos:['photos/patong-240-01.jpg','photos/patong-240-02.jpg','photos/patong-240-03.jpg','photos/patong-240-04.jpg','photos/patong-240-05.jpg','photos/patong-240-06.jpg','photos/patong-240-07.jpg'], map:'https://maps.app.goo.gl/tZDzbiknyEa6KzKE7',
+    desc:'По фото: бассейн во дворе с шезлонгами, большая гостиная, кухня с островом, бильярд, общая терраса.' }
 ];
 
 const PLACES = [
@@ -245,6 +255,8 @@ const PLACES = [
   { id:'kata', name:'Пляж Ката', type:'beach', lat:7.8206, lng:98.2976, desc:'Удобный пляж для купания' },
   { id:'katanoi', name:'Ката Ной', type:'beach', lat:7.8090, lng:98.2985, desc:'Небольшой и красивый пляж' },
   { id:'naiharn', name:'Пляж Най Харн', type:'beach', lat:7.7781, lng:98.3050, desc:'Один из лучших пляжей юга' },
+  { id:'naithon', name:'Пляж Найтон', type:'beach', lat:8.0510, lng:98.2745, desc:'Тихий пляж на северо-западе' },
+  { id:'bangtao', name:'Пляж Банг Тао', type:'beach', lat:7.9990, lng:98.2845, desc:'Длинный пляж, рядом Лагуна' },
   { id:'kamala', name:'Пляж Камала', type:'beach', lat:7.9560, lng:98.2828, desc:'Спокойный пляж на западе' },
   { id:'surin', name:'Пляж Сурин', type:'beach', lat:7.9767, lng:98.2797, desc:'Пляж с пляжными клубами' },
   { id:'buddha', name:'Большой Будда', type:'sight', lat:7.8277, lng:98.3128, desc:'45-метровая статуя на холме, виды на остров' },
@@ -275,14 +287,14 @@ const PLACES = [
     <div class="row2"><span id="shown"></span>
       <select id="sort" aria-label="Сортировка">
         <option value="price">Сначала дешевле</option>
-        <option value="beach">Ближе к пляжу</option>
-        <option value="rating">Выше рейтинг</option>
+        <option value="beach">Ближе к морю</option>
+        <option value="likes">Больше лайков</option>
         <option value="rooms">Больше спален</option>
       </select>
     </div>
   </div>
   <div class="grid" id="list"></div>
-  <p class="demo">Тестовая версия: объекты, цены и фото — демо-данные.</p>
+  <p class="demo" id="demo"></p>
 </section>
 
 <section id="mapView" class="view">
@@ -297,9 +309,12 @@ const PLACES = [
 <section id="favView" class="view">
   <div class="head2">
     <h2>Мой выбор</h2>
-    <p>Отмечайте сердечком понравившиеся варианты. Порядок — ваш приоритет, его можно менять стрелками. Потом отправьте список в общий чат.</p>
-    <label class="who">Ваше имя <input id="who" placeholder="Например, Артём" maxlength="30" autocomplete="off"></label>
+    <p>Отмечайте сердечком понравившиеся варианты — друзья увидят, кто что выбрал. Порядок в «Мои отметки» — ваш приоритет, его можно менять стрелками.</p>
+    <label class="who">Ваше имя (его увидят друзья) <input id="who" placeholder="Например, Артём" maxlength="30" autocomplete="off"></label>
   </div>
+  <div class="sec" id="setup" hidden></div>
+  <div class="sec" id="shared"></div>
+  <div class="sec"><h4>Мои отметки</h4></div>
   <div class="flist" id="flist"></div>
   <div id="cmp"></div>
   <div class="acts" id="favActs">
@@ -315,6 +330,9 @@ const PLACES = [
 </nav>
 
 <div class="sheet" id="sheet"><div class="bd" data-close></div><div class="pn" id="pn"></div></div>
+<div class="sheet" id="ask"><div class="bd" data-askclose></div><div class="askb">
+  <h3>Как вас зовут?</h3><p>Имя увидят друзья рядом с вашими лайками.</p>
+  <input id="askName" maxlength="30" placeholder="Имя" autocomplete="off"><button class="btn c" id="askOk">Готово</button></div></div>
 <div class="toast" id="toast"></div>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -353,7 +371,10 @@ let favs = store.get('phk-favs', []).filter(id => VILLAS.some(v => v.id === id))
 
 /* ---------- утилиты ---------- */
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const money = n => Math.round(n).toLocaleString('ru-RU') + ' ' + TRIP.cur;
+const rub = n => (Math.round(n / 100) * 100).toLocaleString('ru-RU') + '\u00a0₽';
+const money = rub;
+const thb = n => Math.round(n).toLocaleString('ru-RU') + '\u00a0฿';
+const plural = (n, f) => f[(n % 10 === 1 && n % 100 !== 11) ? 0 : (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20)) ? 1 : 2];
 const km = d => d < 1 ? (Math.round(d * 20) * 50) + ' м' : d.toFixed(1).replace('.', ',') + ' км';
 function dist(a, b){
   const R = 6371, r = Math.PI / 180, dLa = (b.lat - a.lat) * r, dLo = (b.lng - a.lng) * r;
@@ -370,9 +391,9 @@ const CAT = {
 
 /* заглушки фото (если photos пустой) */
 const PAL = [['#8fd3ea','#0b5d63','#f3dcae'],['#ffbf94','#127c80','#f6e5c6'],['#a7dccd','#0e4f58','#ecd8b2'],['#ffd884','#1a6f7a','#f2ddb8']];
-function ph(seed, i){
+function ph(seed, i, label){
   const p = PAL[(seed + i) % PAL.length], sx = 560 - i * 110;
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${p[0]}"/><stop offset="1" stop-color="#fff3df"/></linearGradient></defs><rect width="800" height="500" fill="url(#g)"/><circle cx="${sx}" cy="110" r="44" fill="#fff" opacity=".75"/><rect y="300" width="800" height="200" fill="${p[1]}"/><path d="M0 312h800" stroke="#fff" stroke-width="6" opacity=".3"/><path d="M170 300V205l160-70 160 70v95z" fill="${p[2]}"/><path d="M150 212l180-88 180 88" fill="none" stroke="#5a3b28" stroke-width="16" stroke-linejoin="round"/><rect x="292" y="228" width="76" height="72" fill="#5a3b28" opacity=".85"/><rect x="410" y="232" width="56" height="40" fill="#fff" opacity=".7"/><rect x="430" y="340" width="260" height="64" rx="12" fill="#6fe0ea"/><path d="M700 300c-4-60 6-110 30-150M730 150c-30-10-60 0-75 18M730 150c25-22 55-22 70-8M730 150c-5-30 8-52 30-60" fill="none" stroke="#2f5d3a" stroke-width="9" stroke-linecap="round"/><text x="36" y="470" font-family="sans-serif" font-size="26" font-weight="700" fill="#fff" opacity=".85">Демо-фото ${i + 1}</text></svg>`;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${p[0]}"/><stop offset="1" stop-color="#fff3df"/></linearGradient></defs><rect width="800" height="500" fill="url(#g)"/><circle cx="${sx}" cy="110" r="44" fill="#fff" opacity=".75"/><rect y="300" width="800" height="200" fill="${p[1]}"/><path d="M0 312h800" stroke="#fff" stroke-width="6" opacity=".3"/><path d="M170 300V205l160-70 160 70v95z" fill="${p[2]}"/><path d="M150 212l180-88 180 88" fill="none" stroke="#5a3b28" stroke-width="16" stroke-linejoin="round"/><rect x="292" y="228" width="76" height="72" fill="#5a3b28" opacity=".85"/><rect x="410" y="232" width="56" height="40" fill="#fff" opacity=".7"/><rect x="430" y="340" width="260" height="64" rx="12" fill="#6fe0ea"/><path d="M700 300c-4-60 6-110 30-150M730 150c-30-10-60 0-75 18M730 150c25-22 55-22 70-8M730 150c-5-30 8-52 30-60" fill="none" stroke="#2f5d3a" stroke-width="9" stroke-linecap="round"/><text x="36" y="470" font-family="sans-serif" font-size="26" font-weight="700" fill="#fff" opacity=".85">${label || 'Фото ' + (i + 1)}</text></svg>`;
   return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
 }
 
@@ -380,25 +401,33 @@ function ph(seed, i){
 const beaches = PLACES.filter(p => p.type === 'beach');
 const bangla = PLACES.find(p => p.id === 'bangla');
 VILLAS.forEach((v, idx) => {
-  v.imgs = (v.photos && v.photos.length) ? v.photos : [0, 1, 2, 3].map(i => ph(idx, i));
-  v.total = v.priceTotal || v.pricePerNight * TRIP.nights;
-  v.night = v.priceTotal ? v.priceTotal / TRIP.nights : v.pricePerNight;
-  v.pp = Math.round(v.total / TRIP.guests / 100) * 100;
+  v.imgs = (v.photos && v.photos.length) ? v.photos : [ph(idx, 0, v.link ? 'Фото — по ссылке в карточке' : 'Фото скоро будут')];
+  v.thb = v.priceThb; v.total = v.priceThb * TRIP.rate;
+  v.nightThb = v.priceThb / TRIP.nights; v.night = v.total / TRIP.nights;
+  v.pp = v.total / TRIP.people;
   const nb = beaches.map(b => ({ b, d: dist(v, b) })).sort((a, b) => a.d - b.d)[0];
-  v.beach = nb ? nb.d : 99; v.beachName = nb ? nb.b.name : '';
+  v.beach = v.seaM != null ? v.seaM / 1000 : nb ? nb.d : 99;
   v.toBangla = bangla ? dist(v, bangla) : null;
   v.fit = v.total <= TRIP.budgetMax ? 'ok' : v.total <= TRIP.budgetMax * 1.1 ? 'mid' : 'over';
 });
+const seaTxt = v => v.seaM != null ? km(v.seaM / 1000) + ' до моря' : '≈\u00a0' + km(v.beach) + ' до пляжа';
+function facts(v, full){
+  const f = [v.bedrooms ? `${v.bedrooms} спальни` : 'спальни — уточнить'];
+  if(full && v.baths) f.push(`${v.baths} ванные`);
+  if(v.pool) f.push('Бассейн' + (v.poolNote ? ': ' + v.poolNote : ''));
+  return f.map(x => `<li>${esc(x)}</li>`).join('');
+}
 const FIT = { ok:'В бюджете', mid:'Чуть выше бюджета', over:'Дороже бюджета' };
 
 /* ---------- шапка ---------- */
 $('#ttl').textContent = TRIP.title;
-$('#sub').textContent = `${TRIP.dates} · ${TRIP.nights} ночей · ${TRIP.guests}+ человек`;
+$('#sub').textContent = `${TRIP.dates} · ${TRIP.nights} ночей · делим на ${TRIP.people}`;
 $('#stats').innerHTML = [
-  `${VILLAS.length} вариантов`,
-  `бюджет ${Math.round(TRIP.budgetMin / 1000)}–${Math.round(TRIP.budgetMax / 1000)} тыс ${TRIP.cur}`,
-  `от ${money(Math.min(...VILLAS.map(v => v.total)))}`
+  `${VILLAS.length} ${plural(VILLAS.length, ['вариант', 'варианта', 'вариантов'])}`,
+  `от ${thb(Math.min(...VILLAS.map(v => v.thb)))}`,
+  `1 ฿ ≈ ${String(TRIP.rate.toFixed(2)).replace('.', ',')} ₽`
 ].map(s => `<span>${esc(s)}</span>`).join('');
+$('#demo').textContent = `Рубли — по ${TRIP.rateNote} (${TRIP.rate.toFixed(2).replace('.', ',')} ₽ за бат). «С человека» — сумма за весь период на ${TRIP.people}. Бюджет ${Math.round(TRIP.budgetMin / 1000)}–${Math.round(TRIP.budgetMax / 1000)} тыс ₽ на всех.`;
 
 /* ---------- фильтры ---------- */
 const areas = [...new Set(VILLAS.map(v => v.area))];
@@ -413,12 +442,12 @@ function renderFilters(){
   $('#sort').value = F.sort;
 }
 function filtered(){
-  const s = { price:(a, b) => a.total - b.total, beach:(a, b) => a.beach - b.beach, rating:(a, b) => b.rating - a.rating, rooms:(a, b) => b.bedrooms - a.bedrooms }[F.sort];
-  return VILLAS.filter(v => (F.area === 'all' || v.area === F.area) && (!F.budget || v.fit === 'ok') && (!F.pool || v.pool) && (!F.rooms3 || v.bedrooms >= 3)).sort(s);
+  const s = { price:(a, b) => a.total - b.total, beach:(a, b) => a.beach - b.beach, likes:(a, b) => likersOf(b.id).length - likersOf(a.id).length || a.total - b.total, rooms:(a, b) => (b.bedrooms || 0) - (a.bedrooms || 0) }[F.sort] || ((a, b) => a.total - b.total);
+  return VILLAS.filter(v => (F.area === 'all' || v.area === F.area) && (!F.budget || v.fit === 'ok') && (!F.pool || v.pool === true) && (!F.rooms3 || v.bedrooms >= 3)).sort(s);
 }
 
 /* ---------- список ---------- */
-const heartBtn = v => `<button class="heart ${favs.includes(v.id) ? 'on' : ''}" data-fav="${v.id}" aria-label="В избранное"><svg class="i"><use href="#i-heart"/></svg></button>`;
+const heartBtn = (v, flat) => `<button class="heart ${flat ? 'flat' : ''} ${favs.includes(v.id) ? 'on' : ''}" data-fav="${v.id}" aria-label="Нравится"><svg class="i"><use href="#i-heart"/></svg><em data-lkn="${v.id}">${likersOf(v.id).length || ''}</em></button>`;
 function gallery(v){
   return `<div class="galw"><div class="gal" data-gal>${v.imgs.map((src, i) => `<img src="${esc(src)}" alt="${esc(v.name)}, фото ${i + 1}" loading="${i ? 'lazy' : 'eager'}">`).join('')}</div>
     <span class="cnt">1/${v.imgs.length}</span>`;
@@ -427,10 +456,11 @@ function card(v){
   const r = favs.indexOf(v.id);
   return `<article class="card">${gallery(v)}${heartBtn(v)}<span class="badge ${v.fit}">${FIT[v.fit]}</span>${r > -1 ? `<span class="rank">${r + 1}</span>` : ''}</div>
   <div class="body" data-open="${v.id}">
-    <div class="r1"><h3>${esc(v.name)}</h3><div class="price"><b>${money(v.night)}</b><small>за ночь</small></div></div>
-    <div class="area"><svg class="i"><use href="#i-pin"/></svg>${esc(v.area)} · ${km(v.beach)} до пляжа${v.toBangla != null ? ' · ' + km(v.toBangla) + ' до Bangla' : ''}</div>
-    <ul class="facts"><li>${v.bedrooms} спальни</li><li>${v.beds} кровати</li><li>до ${v.guests} гостей</li>${v.pool ? '<li>Бассейн</li>' : ''}<li>★ ${String(v.rating).replace('.', ',')} · ${v.reviews}</li></ul>
-    <div class="tot"><span>За ${TRIP.nights} ночей <b>${money(v.total)}</b></span><span>≈ <b>${money(v.pp)}</b> с чел.</span></div>
+    <div class="r1"><h3>${esc(v.name)}</h3><div class="price"><b>${thb(v.thb)}</b><small>≈ ${rub(v.total)} за ${TRIP.nights} ночей</small></div></div>
+    <div class="area"><svg class="i"><use href="#i-pin"/></svg>${esc(v.area)} · ${seaTxt(v)}${v.toBangla != null && v.toBangla < 4 ? ' · ' + km(v.toBangla) + ' до Bangla' : ''}</div>
+    <ul class="facts">${facts(v)}</ul>
+    <div class="tot"><span>Ночь <b>${thb(v.nightThb)}</b> · ${rub(v.night)}</span><span>На ${TRIP.people}: <b>${rub(v.pp)}</b> с чел.</span></div>
+    <div class="lk" data-lk="${v.id}">${likersHTML(v.id)}</div>
   </div></article>`;
 }
 function renderList(){
@@ -458,21 +488,25 @@ function openSheet(id){
   $('#pn').innerHTML = `<button class="x" data-close aria-label="Закрыть"><svg class="i"><use href="#i-x"/></svg></button>
   ${gallery(v)}${''}<span class="badge ${v.fit}">${FIT[v.fit]}</span></div>
   <div class="shb">
-    <div class="r1"><div><div class="area"><svg class="i"><use href="#i-pin"/></svg>${esc(v.area)} · ${esc(v.source)}</div><h2>${esc(v.name)}</h2></div>
-      <button class="heart flat ${favs.includes(v.id) ? 'on' : ''}" data-fav="${v.id}" aria-label="В избранное"><svg class="i"><use href="#i-heart"/></svg></button></div>
-    <div class="pbox"><div><small>За ночь</small><b>${money(v.night)}</b></div><div><small>За ${TRIP.nights} ночей</small><b>${money(v.total)}</b></div><div><small>С человека</small><b>${money(v.pp)}</b></div></div>
-    <ul class="facts"><li>${v.bedrooms} спальни</li><li>${v.beds} кровати</li><li>${v.baths} ванные</li><li>до ${v.guests} гостей</li>${v.pool ? '<li>Бассейн</li>' : ''}<li>★ ${String(v.rating).replace('.', ',')} · ${v.reviews} отзывов</li></ul>
+    <div class="r1"><div><div class="area"><svg class="i"><use href="#i-pin"/></svg>${esc(v.area)} · ${seaTxt(v)}</div><h2>${esc(v.name)}</h2></div>
+      ${heartBtn(v, true)}</div>
+    <div class="pbox"><div><small>За ${TRIP.nights} ночей</small><b>${thb(v.thb)}</b><em>≈ ${rub(v.total)}</em></div>
+      <div><small>За ночь</small><b>${thb(v.nightThb)}</b><em>≈ ${rub(v.night)}</em></div>
+      <div><small>С человека (на ${TRIP.people})</small><b>${rub(v.pp)}</b><em>≈ ${thb(v.pp / TRIP.rate)}</em></div></div>
+    <p class="rate">Рубли — по ${TRIP.rateNote}: ${TRIP.rate.toFixed(2).replace('.', ',')} ₽ за бат.</p>
+    <ul class="facts">${facts(v, true)}</ul>
+    <h4>Кому нравится</h4><div class="lk" data-lk="${v.id}" data-full="1" style="margin-top:0">${likersHTML(v.id, true)}</div>
     ${v.desc ? `<p class="desc">${esc(v.desc)}</p>` : ''}
     ${v.note ? `<div class="note"><b>Заметка:</b> ${esc(v.note)}</div>` : ''}
     ${v.amenities && v.amenities.length ? `<h4>Удобства</h4><div class="am">${v.amenities.map(a => `<span>${esc(a)}</span>`).join('')}</div>` : ''}
-    <div class="pc"><div><h4>Плюсы</h4><ul>${(v.pros || []).map(x => `<li>${esc(x)}</li>`).join('') || '<li>—</li>'}</ul></div>
-      <div><h4>Минусы</h4><ul>${(v.cons || []).map(x => `<li>${esc(x)}</li>`).join('') || '<li>—</li>'}</ul></div></div>
-    <h4>Что рядом (по прямой)</h4>
+    ${(v.pros && v.pros.length) || (v.cons && v.cons.length) ? `<div class="pc"><div><h4>Плюсы</h4><ul>${(v.pros || []).map(x => `<li>${esc(x)}</li>`).join('') || '<li>—</li>'}</ul></div>
+      <div><h4>Минусы</h4><ul>${(v.cons || []).map(x => `<li>${esc(x)}</li>`).join('') || '<li>—</li>'}</ul></div></div>` : ''}
+    <h4>Что рядом (по прямой)${v.approx ? ' — точка примерная, в объявлении только район' : ''}</h4>
     <ul class="near">${near.map(n => `<li><span><i style="background:${CAT[n.p.type].color}"></i>${esc(n.p.name)}</span><b>${km(n.d)}</b></li>`).join('')}</ul>
     <div class="acts" style="padding:18px 0 0">
-      ${v.link ? `<a class="btn p" data-ext href="${esc(v.link)}" target="_blank" rel="noopener">Открыть объявление<svg class="i"><use href="#i-ext"/></svg></a>` : ''}
+      ${v.link ? `<a class="btn p" data-ext href="${esc(v.link)}" target="_blank" rel="noopener">${esc(v.linkText || 'Открыть объявление')}<svg class="i"><use href="#i-ext"/></svg></a>` : ''}
       <button class="btn" data-onmap="${v.id}"><svg class="i"><use href="#i-map"/></svg>На карте</button>
-      <a class="btn" data-ext href="${gm}" target="_blank" rel="noopener">Google Maps</a>
+      <a class="btn ${v.link ? '' : 'p'}" data-ext href="${esc(v.map || gm)}" target="_blank" rel="noopener">${v.map ? 'Локация в Google Maps' : v.approx ? 'Район в Google Maps' : 'Google Maps'}</a>
     </div>
   </div>`;
   bindGalleries($('#pn'));
@@ -486,22 +520,133 @@ function closeSheet(){
   document.body.style.overflow = ''; syncBack();
 }
 
+/* ---------- общие лайки (jsonblob.com) ---------- */
+const tgUser = inTG && tg.initDataUnsafe && tg.initDataUnsafe.user;
+let uid = store.get('phk-uid', '');
+if(tgUser && tgUser.id) uid = 'tg' + tgUser.id;
+else if(!uid) uid = 'u' + Math.random().toString(36).slice(2, 10);
+store.set('phk-uid', uid);
+let myName = String(store.get('phk-who', '') || (tgUser ? [tgUser.first_name, tgUser.last_name].filter(Boolean).join(' ') : '')).slice(0, 30);
+const hashSync = (location.hash.match(/^#sync-([\w-]{6,})$/) || [])[1];
+if(hashSync) store.set('phk-sync', hashSync);
+const syncId = () => SYNC.id || store.get('phk-sync', '');
+let shared = { likes: {} }, syncState = syncId() ? 'wait' : 'off', syncAt = 0;
+const COLORS = ['#ff6a45', '#1aa3c4', '#8e5bd6', '#1d9466', '#e2457a', '#e08a1e', '#0b5d63'];
+const colorOf = n => COLORS[[...String(n)].reduce((a, c) => a + c.charCodeAt(0), 0) % COLORS.length];
+function likersOf(vid){
+  const out = [];
+  if(favs.includes(vid)) out.push({ name: myName || 'Вы', me: true, rank: favs.indexOf(vid) + 1 });
+  for(const [k, u] of Object.entries((shared && shared.likes) || {})){
+    if(k === uid || !u || !Array.isArray(u.ids)) continue;
+    const i = u.ids.indexOf(vid);
+    if(i > -1) out.push({ name: String(u.name || 'Без имени').slice(0, 30), rank: i + 1 });
+  }
+  return out;
+}
+function likersHTML(vid, full){
+  const L = likersOf(vid);
+  if(!L.length) return full ? '<span>Пока никто не отметил</span>' : '';
+  const av = L.slice(0, 5).map(p => `<b style="background:${colorOf(p.name)}">${esc(p.name.trim().charAt(0).toUpperCase() || '?')}</b>`).join('');
+  const names = L.map(p => esc(p.me ? (p.name === 'Вы' ? 'вы' : p.name + ' (вы)') : p.name) + (full ? ` — №${p.rank}` : '')).join(', ');
+  return `<span class="av">${av}</span><span>${full ? names : 'Нравится: ' + names}</span>`;
+}
+function updateLikers(){
+  document.querySelectorAll('[data-lk]').forEach(el => { el.innerHTML = likersHTML(el.dataset.lk, el.dataset.full); });
+  document.querySelectorAll('[data-lkn]').forEach(el => { el.textContent = likersOf(el.dataset.lkn).length || ''; });
+  if($('#favView').classList.contains('on')) renderShared();
+}
+const jget = async id => { const r = await fetch(SYNC.api + id, { headers: { Accept: 'application/json' }, cache: 'no-store' }); if(!r.ok) throw new Error('HTTP ' + r.status); return r.json(); };
+async function pull(){
+  const id = syncId(); if(!id) return;
+  try{
+    const d = await jget(id);
+    shared = d && d.likes ? d : { likes: {} }; syncState = 'ok'; syncAt = Date.now();
+    const mine = shared.likes[uid];
+    if(mine && Array.isArray(mine.ids) && !favs.length && !store.get('phk-favs-touched', false)){
+      favs = mine.ids.filter(x => VILLAS.some(v => v.id === x)); store.set('phk-favs', favs); refreshAll(); return;
+    }
+  }catch(e){ syncState = 'err'; }
+  updateLikers();
+}
+let pushT = 0, pushing = false, retried = false;
+function schedulePush(){ if(!syncId()) return; clearTimeout(pushT); pushT = setTimeout(push, 600); }
+async function push(){
+  const id = syncId(); if(!id) return;
+  if(pushing){ schedulePush(); return; }
+  pushing = true;
+  try{
+    let d = {}; try{ d = await jget(id); }catch(_){}
+    const likes = (d && d.likes) || {};
+    likes[uid] = { name: myName || 'Без имени', ids: favs.slice(), t: Date.now() };
+    const w = await fetch(SYNC.api + id, { method: 'PUT', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify({ v: 1, likes }) });
+    if(!w.ok) throw new Error('HTTP ' + w.status);
+    shared = { v: 1, likes }; syncState = 'ok'; syncAt = Date.now(); retried = false;
+  }catch(e){
+    syncState = 'err';
+    if(!retried){ retried = true; setTimeout(schedulePush, 6000); } else toast('Нет связи с общим списком — отметка сохранена у вас');
+  }
+  pushing = false; updateLikers();
+}
+function renderShared(){
+  const id = syncId(), t = syncAt ? new Date(syncAt).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }) : '';
+  const st = !id ? 'Общие лайки ещё не подключены — пока видны только ваши отметки.'
+    : syncState === 'err' ? 'Нет связи с общим списком, пробую снова…'
+    : syncState === 'ok' ? `Общий список обновлён в ${t}.` : 'Загружаю общий список…';
+  const people = Object.entries((shared && shared.likes) || {}).filter(([k, u]) => k !== uid && u && Array.isArray(u.ids) && u.ids.length).length + (favs.length ? 1 : 0);
+  const rank = VILLAS.map(v => ({ v, L: likersOf(v.id) })).filter(x => x.L.length).sort((a, b) => b.L.length - a.L.length || a.v.total - b.v.total);
+  $('#shared').innerHTML = `<h4>Общий выбор${people ? ` · ${people} ${plural(people, ['человек', 'человека', 'человек'])}` : ''}</h4><p class="st">${st}</p>
+    <div class="rk">${rank.length ? rank.map(x => `<div data-open="${x.v.id}"><span class="c">${x.L.length}</span>
+      <div><h3>${esc(x.v.name)}</h3><small>${esc(x.v.area)} · ${thb(x.v.thb)} · ${rub(x.v.pp)} с чел.</small><div class="lk" style="margin-top:6px">${likersHTML(x.v.id, true)}</div></div>
+      <svg class="i" style="color:var(--mute)"><use href="#i-heart"/></svg></div>`).join('') : '<div class="empty" style="display:block;padding:16px;cursor:default">Пока никто ничего не отметил.</div>'}</div>`;
+}
+function askName(){ $('#askName').value = myName; $('#ask').classList.add('on'); setTimeout(() => $('#askName').focus(), 50); }
+function saveName(){
+  const n = $('#askName').value.trim().slice(0, 30); if(!n){ $('#askName').focus(); return; }
+  myName = n; store.set('phk-who', n); $('#who').value = n; $('#ask').classList.remove('on');
+  if(pendingLike){ const id = pendingLike; pendingLike = null; toggleFav(id); } else schedulePush();
+}
+$('#askOk').addEventListener('click', saveName);
+$('#askName').addEventListener('keydown', e => { if(e.key === 'Enter') saveName(); });
+/* разовая настройка: страница с #setup создаёт общее хранилище */
+if(location.hash === '#setup'){
+  const box = $('#setup'); box.hidden = false;
+  const page = location.href.split('#')[0];
+  box.innerHTML = `<div class="setup"><b>Настройка общих лайков</b><p class="st">${syncId() ? 'Уже подключено: ' + esc(syncId()) : 'Создаст общее хранилище на jsonblob.com.'}</p>
+    <button class="btn c" id="mkSync">Создать общее хранилище</button><div id="mkOut"></div></div>`;
+  $('#mkSync').addEventListener('click', async () => {
+    const out = $('#mkOut'); out.innerHTML = '<p class="st">Создаю…</p>';
+    try{
+      const r = await fetch(SYNC.api.replace(/\/$/, ''), { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify({ v: 1, likes: {} }) });
+      const loc = r.headers.get('Location') || r.headers.get('X-jsonblob') || '';
+      const nid = (loc.match(/([\w-]{6,})\/?$/) || [])[1];
+      if(!r.ok || !nid) throw new Error(r.ok ? 'no-id' : 'HTTP ' + r.status);
+      store.set('phk-sync', nid); syncState = 'wait'; pull();
+      out.innerHTML = `<p class="st">Готово. Номер хранилища:</p><code>${esc(nid)}</code><p class="st">Пришлите его Claude, чтобы вшить в страницу. А пока можно разослать ссылку:</p><code>${esc(page)}#sync-${esc(nid)}</code>`;
+    }catch(e){
+      out.innerHTML = `<p class="st">Не получилось (${esc(e.message)}). Запасной путь: откройте jsonblob.com, нажмите Save и пришлите Claude ссылку из адресной строки.</p>`;
+    }
+  });
+}
+
 /* ---------- избранное ---------- */
+let pendingLike = null;
 function toggleFav(id){
+  if(!favs.includes(id) && !myName && syncId()){ pendingLike = id; askName(); return; }
   const i = favs.indexOf(id);
   if(i > -1) favs.splice(i, 1); else favs.push(id);
-  store.set('phk-favs', favs); haptic();
-  toast(i > -1 ? 'Убрано из выбора' : 'Добавлено в «Мой выбор»');
-  refreshAll();
+  store.set('phk-favs', favs); store.set('phk-favs-touched', true); haptic();
+  toast(i > -1 ? 'Убрано из выбора' : 'Отмечено — друзья это увидят');
+  refreshAll(); schedulePush();
 }
 function moveFav(id, d){
   const i = favs.indexOf(id), j = i + d;
   if(i < 0 || j < 0 || j >= favs.length) return;
   [favs[i], favs[j]] = [favs[j], favs[i]];
-  store.set('phk-favs', favs); renderFav(); renderList();
+  store.set('phk-favs', favs); renderFav(); renderList(); schedulePush();
 }
 function renderFav(){
   $('#favN').textContent = favs.length || '';
+  renderShared();
   const items = favs.map(id => VILLAS.find(v => v.id === id));
   $('#favActs').style.display = items.length ? '' : 'none';
   if(!items.length){
@@ -509,28 +654,28 @@ function renderFav(){
     $('#cmp').innerHTML = ''; return;
   }
   $('#flist').innerHTML = items.map((v, i) => `<div class="fi"><span class="n">${i + 1}</span><img src="${esc(v.imgs[0])}" alt="">
-    <div data-open="${v.id}" style="cursor:pointer"><h3>${esc(v.name)}</h3><small>${esc(v.area)} · ${money(v.total)}</small></div>
+    <div data-open="${v.id}" style="cursor:pointer"><h3>${esc(v.name)}</h3><small>${esc(v.area)} · ${thb(v.thb)} · ${rub(v.pp)} с чел.</small></div>
     <div class="mv"><button class="ib" data-mv="${v.id}" data-d="-1" aria-label="Выше"><svg class="i"><use href="#i-up"/></svg></button><button class="ib" data-mv="${v.id}" data-d="1" aria-label="Ниже"><svg class="i"><use href="#i-down"/></svg></button></div></div>`).join('');
   if(items.length < 2){ $('#cmp').innerHTML = ''; return; }
-  const min = (k, inv) => { const a = items.map(v => v[k]); return inv ? Math.max(...a) : Math.min(...a); };
   const rows = [
-    ['За период', v => money(v.total), 'total'], ['С человека', v => money(v.pp), 'pp'], ['За ночь', v => money(v.night), 'night'],
-    ['Спальни', v => v.bedrooms, 'bedrooms', 1], ['Гостей', v => v.guests, 'guests', 1], ['До пляжа', v => km(v.beach), 'beach'],
-    ['Рейтинг', v => String(v.rating).replace('.', ','), 'rating', 1], ['Бассейн', v => v.pool ? 'да' : 'нет']
+    ['За период, ฿', v => thb(v.thb), v => -v.thb], ['За период, ₽', v => rub(v.total), v => -v.total],
+    ['С человека, ₽', v => rub(v.pp), v => -v.pp], ['За ночь, ฿', v => thb(v.nightThb), v => -v.nightThb],
+    ['Спальни', v => v.bedrooms || '—', v => v.bedrooms || 0], ['До моря', v => v.seaM != null ? km(v.seaM / 1000) : '≈ ' + km(v.beach), v => -v.beach],
+    ['Бассейн', v => v.pool ? (v.poolNote || 'да') : '—'], ['Лайков', v => likersOf(v.id).length, v => likersOf(v.id).length]
   ];
-  $('#cmp').innerHTML = `<div class="sec"><h4>Сравнение</h4></div><div class="scroll"><table><thead><tr><th></th>${items.map(v => `<th class="num">${esc(v.name)}</th>`).join('')}</tr></thead><tbody>
-    ${rows.map(([t, f, k, inv]) => { const best = k ? min(k, inv) : null;
-      return `<tr><th>${t}</th>${items.map(v => `<td class="num ${k && v[k] === best ? 'best' : ''}">${f(v)}</td>`).join('')}</tr>`; }).join('')}
+  $('#cmp').innerHTML = `<div class="sec"><h4>Сравнение моих отметок</h4></div><div class="scroll"><table><thead><tr><th></th>${items.map(v => `<th class="num">${esc(v.name)}</th>`).join('')}</tr></thead><tbody>
+    ${rows.map(([t, f, sc]) => { const best = sc ? Math.max(...items.map(sc)) : null;
+      return `<tr><th>${t}</th>${items.map(v => `<td class="num ${sc && sc(v) === best ? 'best' : ''}">${f(v)}</td>`).join('')}</tr>`; }).join('')}
   </tbody></table></div>`;
 }
 function favText(){
   const who = $('#who').value.trim();
   const lines = favs.map((id, i) => { const v = VILLAS.find(x => x.id === id);
-    return `${i + 1}. ${v.name} (${v.area}) — ${money(v.total)} за ${TRIP.nights} ноч., ≈${money(v.pp)} с чел.${v.link ? '\n   ' + v.link : ''}`; });
+    return `${i + 1}. ${v.name} (${v.area}) — ${thb(v.thb)} ≈ ${rub(v.total)} за ${TRIP.nights} ноч., на ${TRIP.people}: ${rub(v.pp)} с чел.${v.link ? '\n   ' + v.link : ''}`; });
   return `Мой выбор вилл на Пхукете${who ? ' — ' + who : ''}:\n` + lines.join('\n');
 }
-$('#who').value = store.get('phk-who', '');
-$('#who').addEventListener('input', e => store.set('phk-who', e.target.value));
+$('#who').value = myName;
+$('#who').addEventListener('input', e => { myName = e.target.value.trim().slice(0, 30); store.set('phk-who', myName); updateLikers(); schedulePush(); });
 $('#shareBtn').addEventListener('click', () => {
   if(!favs.length) return;
   const page = /^https?:/.test(location.href) ? location.href.split('#')[0] : '';
@@ -569,7 +714,7 @@ const ROADS = [
 ];
 const AREAS = [['Патонг',7.904,98.313],['Камала',7.957,98.298],['Карон',7.849,98.309],['Ката',7.815,98.314],['Равай',7.783,98.339],
   ['Чалонг',7.833,98.349],['Пхукет-таун',7.902,98.392],['Кату',7.917,98.341],['Таланг',8.035,98.352],['Банг Тао',8.002,98.302],
-  ['Май Кхао',8.160,98.306],['Кейп Панва',7.815,98.398]];
+  ['Май Кхао',8.160,98.306],['Найтон',8.058,98.297],['Кейп Панва',7.815,98.398]];
 const SEAS = [['Андаманское море',7.930,98.205],['Залив Пхангнга',8.000,98.500],['Материк',8.290,98.380]];
 
 const f2 = p => p[0].toFixed(2) + ',' + p[1].toFixed(2);
@@ -668,7 +813,7 @@ function drawVillas(){
       html: `<div class="mk" data-pid="${p.id}"><div class="ppin" style="background:${CAT[p.type].color}"><svg viewBox="0 0 24 24">${CAT[p.type].svg}</svg></div><span class="pl r">${esc(p.name)}</span></div>` })),
     ...AREAS.map(([n, la, lo]) => ({ kind: 'area', minK: 6, xy: P(la, lo), html: `<div class="mk"><span class="al">${esc(n)}</span></div>` })),
     ...vs.map(v => ({ kind: 'villa', xy: P(v.lat, v.lng),
-      html: `<div class="mk" data-vid="${v.id}"><div class="vpin ${v.id === sel ? 'sel' : favs.includes(v.id) ? 'fav' : ''}">${favs.includes(v.id) ? '♥ ' : ''}${Math.round(v.night / 1000)} тыс</div></div>` }))
+      html: `<div class="mk" data-vid="${v.id}"><div class="vpin ${v.approx ? 'apx' : ''} ${v.id === sel ? 'sel' : favs.includes(v.id) ? 'fav' : ''}">${favs.includes(v.id) ? '♥ ' : ''}${v.approx ? '≈ ' : ''}${Math.round(v.thb / 1000)} тыс ฿</div></div>` }))
   ];
   const tp = tipId && PLACES.find(p => p.id === tipId && LAY[p.type]);
   if(!tp) tipId = null;
@@ -778,7 +923,7 @@ function selectVilla(id, zoom){
   const v = VILLAS.find(x => x.id === id); if(!v) return;
   sel = id; tipId = null; drawVillas();
   $('#peek').innerHTML = `<img src="${esc(v.imgs[0])}" alt=""><div><h3>${esc(v.name)}</h3>
-    <div class="area">${esc(v.area)} · ${km(v.beach)} до пляжа</div><div style="margin-top:4px;font-size:14px"><b>${money(v.night)}</b> / ночь · ${v.bedrooms} спальни</div>
+    <div class="area">${esc(v.area)} · ${seaTxt(v)}${v.approx ? ' · точка примерная' : ''}</div><div style="margin-top:4px;font-size:14px"><b>${thb(v.thb)}</b> ≈ ${rub(v.total)} · ${rub(v.pp)} с чел.</div>
     <button class="chip" data-open="${v.id}" style="margin-top:8px;min-height:34px;padding:6px 12px">Подробнее</button></div>
     <button class="x" data-unpeek aria-label="Закрыть" style="width:30px;height:30px"><svg class="i" style="width:16px;height:16px"><use href="#i-x"/></svg></button>`;
   $('#peek').classList.add('on'); syncMapUI();
@@ -816,12 +961,13 @@ function refreshAll(){
 }
 
 document.addEventListener('click', e => {
-  const el = e.target.closest('[data-fav],[data-open],[data-close],[data-tab],[data-area],[data-flag],[data-reset],[data-mv],[data-layer],[data-onmap],[data-unpeek],[data-zoom],[data-fit],[data-ext]');
+  const el = e.target.closest('[data-fav],[data-open],[data-close],[data-tab],[data-area],[data-flag],[data-reset],[data-mv],[data-layer],[data-onmap],[data-unpeek],[data-zoom],[data-fit],[data-askclose],[data-ext]');
   if(!el) return;
   const d = el.dataset;
   if('fav' in d){ e.stopPropagation(); toggleFav(d.fav); }
   else if('open' in d) openSheet(d.open);
   else if('close' in d) closeSheet();
+  else if('askclose' in d){ pendingLike = null; $('#ask').classList.remove('on'); }
   else if('tab' in d){ closeSheet(); setTab(d.tab); }
   else if('area' in d){ F.area = d.area; store.set('phk-filter', F); renderFilters(); renderList(); drawVillas(); }
   else if('flag' in d){ F[d.flag] = !F[d.flag]; store.set('phk-filter', F); renderFilters(); renderList(); drawVillas(); }
@@ -838,6 +984,8 @@ $('#sort').addEventListener('change', e => { F.sort = e.target.value; store.set(
 document.addEventListener('keydown', e => { if(e.key === 'Escape' && openId) closeSheet(); });
 
 renderFilters(); renderList(); renderFav(); renderLayers();
+if(syncId()){ pull(); setInterval(() => { if(!document.hidden) pull(); }, 15000); }
+document.addEventListener('visibilitychange', () => { if(!document.hidden && syncId()) pull(); });
 }
 </script>
 </body>
