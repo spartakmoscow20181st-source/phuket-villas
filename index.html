@@ -42,6 +42,7 @@ select{border:1px solid var(--line);background:var(--card);border-radius:10px;pa
 .galw{position:relative}
 .gal{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;aspect-ratio:16/10;background:var(--soft)}
 .gal::-webkit-scrollbar{display:none}
+.gal img.broken,.pt img.broken{display:none}
 .gal img{flex:0 0 100%;width:100%;height:100%;object-fit:cover;scroll-snap-align:start;display:block}
 .cnt{position:absolute;right:10px;bottom:10px;background:rgba(0,0,0,.55);color:#fff;font-size:12px;font-weight:700;padding:3px 8px;border-radius:8px}
 .heart{position:absolute;top:10px;right:10px;width:44px;height:44px;border-radius:50%;border:0;background:rgba(255,255,255,.92);color:#13242a;display:grid;place-items:center;box-shadow:0 2px 8px rgba(0,0,0,.2)}
@@ -250,8 +251,9 @@ const SYNC = { api: 'https://jsonblob.com/api/jsonBlob/', id: '' };
 /* Фото, загруженные через сайт: хранятся в этом репозитории GitHub (photos/up/ и photos.json). */
 const GH = { owner: 'spartakmoscow20181st-source', repo: 'phuket-villas', branch: 'main', file: 'photos.json' };
 
+const DRIVE_IDS = ["1Pl5WnNlDcCo9twYqP4Q7Eq3MyoPNFhmL", "1UoZ6oR2F4GffHDCkgL3Zrwmvvs6yJbeJ", "14qXT84mRvhmOxQyDmkPMGL70Ar4B8WuK", "12s9Xlx631Zo31QnZn7Egm_qwy83hIn9d", "1Iy5G7_VCq58MMuFlyCtjVV4aOnsGaNDl", "1STAATr8vVz0xRlvKs1-ELWr8G2Vog7ev", "1m66rKG6PA-jtMTy5T-aywDCdcL39r2mn", "1Bz1Tow82dTzClz5jRE_pxa90rhahhdVw", "1qL9URxQiUIg1bGNO9XpLVcG0184OhFcC", "1sbWO2XjEGXInd7OjP5YNqOzRRCDSztr8", "1IZPTBBTr8omyJdVZNd5SotuFDccGZb-u", "1Iz81fd3dJO-WI04mFActiX0h1UzgJGXp", "1ZmJVnwSFm5WWjBqeiqQC-7fLEp5NqcaI", "1URp407wcCJDT80sneluo9cpaS5rvS7Oz", "1Eoml5SCQ267moyiblkCfPwFcWim5RgGo", "19UzYs5Pq9uTFMUFabnJDHHrUQ_8owhiY", "1hfHEXmaCpJ4VvzzvaKBR9n9-rl_jwQe2", "19RY3kE6sGRMz2Jo3AMrnm2MItSoafp1W", "1DGJTODvfpooW9eI10215iQf8n8pparEa", "1p_DGmXxR2_awzHjXHDVuKWLMfiVDnPU9", "1ikQodsL5i1FBVkK2JXljFu3pWOYvwgwJ", "1q5gchWLdHE2p05IAPVkjKVC8RufmlD4J", "1Jfo2lIc3rXlY5cJqJ1EV4-H98Zzt29eU", "1vK_w2kc-5ewYHR3oi7f0Ck-LP7Rf02Yp", "1dVuisKWJylkQ8-aCAc47cAH-LB7M7N9F", "1LgJd_d_a-Xcy7Qk4HyEoomaDF1-zShEf", "18zrVKbCae0I0i3GZ947PGqgTr-1W4luG", "1kArZgW9-L0euQcRiNgpybhtKVvkadWbn", "1rHavfwCedDiyy4gZXzEbXFVpb4B5TqJ2", "17fIHTEhnhB_ztdKWUlcGv6p93Jgq34yB", "1ZfZoQFZpK_sXIfabVhyBzdkm3OlzzShK", "16fbMi3N1ZmJHZOf61tgbAK3uhhGidli0", "19ClSyktjSE9s6ntMRXErJ0KfULQCcRb5", "1SFPAv4UxFbNKNatC4YeLd1gt1sFVhhgo", "1NqmkWs_Ku57WbdLj9xTH3l8jK7N-o91_", "1PFoKBWrIjvYILtflSFAO97n70fxKATE6", "1Li3ioMjvsntCwQvuCxnWk3pnZQpACdiV", "1nZptGZN8xEQJrDuI8r74BHbVmdlF04Md", "1RRpVFZ0oVVEvFBxds2mCJFiIfw5mf68B", "1NuZeHbtoMvibZOhNNuO89KncKD6PtC8S", "1kjl-cxUE4NhkbSJ_34Upj9P0SU7GGcnu", "1daZmB7RTfklRRFlZZArBI24m4OgTJKrv", "1Ex5FVEqHTgRmn1O23gamXSJdJrnxdnXz", "1XySUxJT6R9Eod03c5Le8IVBavqpgwW-Y", "1azzUBLR99b7UEuqRvvDs2v3VW-WeXJqF", "1ttKDgfhIES1kUwYtnBO2Ow6-S436ijno", "1glLVWKm7Pr8unZjTP2Z4KA0YQx6-nRgU", "1I9GOx3Jon-9PmGZrmuqrqwX_u6UgxP8g", "1_qBkLU0FThRGICgxVlKvexI_C8rpo8Xi", "1RuDHoZCx-6mVxRg1Z2L32LpBsP9ipOSz", "1J7PKtvWlNsUNJ4gJcaYG7foH4Za-SDvB", "1ElOXxwsjqESuelyJ0pozNj0NV8P1lVp2", "1upJUJuI16RednjrpsddDyytoWcmLGTar", "1E7IAofFZ3UzJlZsQi-fX1YZgPcIv6Yrq"];
 const VILLAS = [
-  { id:'chalong-thai', name:'Тайская вилла 300 м²', area:'Чалонг', lat:7.8290, lng:98.3500, approx:true,
+  { id:'chalong-thai', name:'Тайская вилла 300 м²', area:'Чалонг', lat:7.8360, lng:98.3500, approx:true,
     priceThb:129000, bedrooms:3, baths:3, seaM:600, pool:true, poolNote:'свой, 8 м',
     photos:[], link:'https://kommo.cc/K/YXINYE/YR9I1S', linkText:'Фото и объявление',
     desc:'Просторная вилла в тайском стиле площадью 300 м² с собственным 8-метровым бассейном и шезлонгами. Три спальни с отдельными ванными, гостиная со Smart TV, обеденная зона и хорошо оборудованная кухня.',
@@ -270,6 +272,14 @@ const VILLAS = [
     priceThb:240000, bedrooms:null, pool:true, poolNote:'во дворе',
     photos:['photos/patong-240-01.jpg','photos/patong-240-02.jpg','photos/patong-240-03.jpg','photos/patong-240-04.jpg','photos/patong-240-05.jpg','photos/patong-240-06.jpg','photos/patong-240-07.jpg'], map:'https://maps.app.goo.gl/tZDzbiknyEa6KzKE7',
     desc:'По фото: бассейн во дворе с шезлонгами, большая гостиная, кухня с островом, бильярд, общая терраса.' },
+  { id:'chalong-kata', name:'Вилла на Чалонге рядом с Ката', area:'Чалонг', lat:7.8260278, lng:98.3368056,
+    priceThb:175000, bedrooms:3, pool:true, poolNote:'свой',
+    seaText:'7 мин на байке до пляжа Ката',
+    ride:[['Пляж Ката', 7], ['Пляж Карон', 11], ['Патонг', 22]],
+    photos:DRIVE_IDS.map(id => 'https://drive.google.com/thumbnail?id=' + id + '&sz=w1600'),
+    link:'https://drive.google.com/drive/folders/1ZAo-y9fICq3XCMV9JzOyXpmEtpOIEBLE', linkText:'Все фото на Google Диске',
+    map:'https://maps.app.goo.gl/aeYUno2LHy1DUsgj7',
+    desc:'Вилла с тремя спальнями на Чалонге, рядом с районом Ката. По фото — свой бассейн во дворе за забором, раздвижные двери из гостиной прямо к воде.' },
   { id:'patong-4br', name:'Вилла на 4 спальни у пляжа Патонг', area:'Патонг', lat:7.8984, lng:98.2998, approx:true, approxText:'точная геолокация уточняется',
     priceThb:256000, bedrooms:4, baths:4, beds:'3 двуспальные (1,9 × 2 м) и 2 односпальные', guests:8, pool:true, poolNote:'свой, с водопадом',
     seaText:'на пляже Патонг', photos:[],
@@ -288,9 +298,9 @@ const PLACES = [
   { id:'patong', name:'Пляж Патонг', type:'beach', lat:7.8961, lng:98.2960, desc:'Главный пляж, в Новый год — салют' },
   { id:'kalim', name:'Пляж Калим', type:'beach', lat:7.9132, lng:98.2946, desc:'Тихая часть Патонга' },
   { id:'freedom', name:'Фридом Бич', type:'beach', lat:7.8742, lng:98.2748, desc:'Добраться — на лодке из Патонга' },
-  { id:'karon', name:'Пляж Карон', type:'beach', lat:7.8448, lng:98.2944, desc:'Длинный пляж с «поющим» песком' },
-  { id:'kata', name:'Пляж Ката', type:'beach', lat:7.8206, lng:98.2976, desc:'Удобный пляж для купания' },
-  { id:'katanoi', name:'Ката Ной', type:'beach', lat:7.8090, lng:98.2985, desc:'Небольшой и красивый пляж' },
+  { id:'karon', name:'Пляж Карон', type:'beach', lat:7.8470, lng:98.2948, desc:'Длинный пляж с «поющим» песком' },
+  { id:'kata', name:'Пляж Ката', type:'beach', lat:7.8239, lng:98.2985, desc:'Удобный пляж для купания' },
+  { id:'katanoi', name:'Ката Ной', type:'beach', lat:7.8095, lng:98.2998, desc:'Небольшой и красивый пляж' },
   { id:'naiharn', name:'Пляж Най Харн', type:'beach', lat:7.7781, lng:98.3050, desc:'Один из лучших пляжей юга' },
   { id:'naithon', name:'Пляж Найтон', type:'beach', lat:8.0510, lng:98.2745, desc:'Тихий пляж на северо-западе' },
   { id:'bangtao', name:'Пляж Банг Тао', type:'beach', lat:7.9990, lng:98.2845, desc:'Длинный пляж, рядом Лагуна' },
@@ -298,8 +308,8 @@ const PLACES = [
   { id:'surin', name:'Пляж Сурин', type:'beach', lat:7.9767, lng:98.2797, desc:'Пляж с пляжными клубами' },
   { id:'buddha', name:'Большой Будда', type:'sight', lat:7.8277, lng:98.3128, desc:'45-метровая статуя на холме, виды на остров' },
   { id:'chalong', name:'Ват Чалонг', type:'sight', lat:7.8469, lng:98.3368, desc:'Главный буддийский храм острова' },
-  { id:'promthep', name:'Мыс Промтеп', type:'sight', lat:7.7618, lng:98.3057, desc:'Закат на самой южной точке' },
-  { id:'viewpoint', name:'Смотровая трёх пляжей', type:'sight', lat:7.7990, lng:98.3040, desc:'Вид на Ката Ной, Ката и Карон' },
+  { id:'promthep', name:'Мыс Промтеп', type:'sight', lat:7.7668, lng:98.3058, desc:'Закат на самой южной точке' },
+  { id:'viewpoint', name:'Смотровая трёх пляжей', type:'sight', lat:7.8002, lng:98.3030, desc:'Вид на Ката Ной, Ката и Карон' },
   { id:'oldtown', name:'Старый город Пхукета', type:'sight', lat:7.8846, lng:98.3887, desc:'Сино-португальские улочки и кафе' },
   { id:'fantasea', name:'Phuket FantaSea', type:'sight', lat:7.9563, lng:98.2890, desc:'Вечернее шоу-парк' },
   { id:'bangla', name:'Bangla Road', type:'night', lat:7.8935, lng:98.2985, desc:'Ночная улица: бары и клубы' },
@@ -311,7 +321,7 @@ const PLACES = [
   { id:'central', name:'Central Phuket', type:'shop', lat:7.8913, lng:98.3680, desc:'Самый большой ТЦ острова' },
   { id:'hkt', name:'Аэропорт Пхукета (HKT)', type:'transport', lat:8.1132, lng:98.3169, desc:'Около 40–60 минут до Патонга' },
   { id:'rassada', name:'Пирс Рассада', type:'transport', lat:7.8555, lng:98.4010, desc:'Паромы на Пхи-Пхи' },
-  { id:'chalongpier', name:'Пирс Чалонг', type:'transport', lat:7.8195, lng:98.3590, desc:'Катера на острова' }
+  { id:'chalongpier', name:'Пирс Чалонг', type:'transport', lat:7.8205, lng:98.3440, desc:'Катера на острова' }
 ];
 </script>
 
@@ -410,6 +420,14 @@ const haptic = () => { try{ inTG && tg.HapticFeedback.impactOccurred('light'); }
 function openExt(url){ if(inTG){ try{ tg.openLink(url); return true; }catch(e){} } return false; }
 function openTgLink(url){ if(inTG){ try{ tg.openTelegramLink(url); return; }catch(e){} } location.href = url; }
 
+/* фото с Google Диска: если превью не отдалось — пробуем другой адрес, потом прячем */
+document.addEventListener('error', e => {
+  const im = e.target; if(!im || im.tagName !== 'IMG') return;
+  const m = im.src.match(/drive\.google\.com\/thumbnail\?id=([\w-]+)/);
+  if(m){ im.src = 'https://lh3.googleusercontent.com/d/' + m[1] + '=w1600'; return; }
+  if(/googleusercontent\.com\/d\//.test(im.src)){ im.classList.add('broken'); const g = im.closest('[data-gal]'); if(g){ const c = g.parentElement.querySelector('.cnt'); if(c) c.textContent = (Math.round(g.scrollLeft / g.clientWidth) + 1) + '/' + g.querySelectorAll('img:not(.broken)').length; } }
+}, true);
+
 /* ---------- хранилище ---------- */
 const store = {
   get(k, d){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; }catch(e){ return d; } },
@@ -454,7 +472,7 @@ VILLAS.forEach((v, idx) => {
   v.nightThb = v.priceThb / TRIP.nights; v.night = v.total / TRIP.nights;
   v.pp = v.total / TRIP.people;
   const nb = beaches.map(b => ({ b, d: dist(v, b) })).sort((a, b) => a.d - b.d)[0];
-  v.beach = v.seaText ? 0.1 : v.seaM != null ? v.seaM / 1000 : nb ? nb.d : 99;
+  v.beach = v.seaM != null ? v.seaM / 1000 : nb ? nb.d : 99;
   v.toBangla = bangla ? dist(v, bangla) : null;
   v.fit = v.pp <= TRIP.ppMax ? 'ok' : v.pp <= TRIP.ppMax * 1.1 ? 'mid' : 'over';
 });
@@ -549,6 +567,7 @@ function openSheet(id){
     <ul class="facts">${facts(v, true)}</ul>
     <h4>Кому нравится</h4><div class="lk" data-lk="${v.id}" data-full="1" style="margin-top:0">${likersHTML(v.id, true)}</div>
     ${v.desc ? `<p class="desc">${esc(v.desc)}</p>` : ''}
+    ${v.ride && v.ride.length ? `<h4>На байке</h4><ul class="near">${v.ride.map(([n, m]) => `<li><span>${esc(n)}</span><b>${m} мин</b></li>`).join('')}</ul>` : ''}
     ${v.layout && v.layout.length ? `<h4>Планировка</h4><ul class="lay">${v.layout.map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : ''}
     ${v.note ? `<div class="note"><b>Заметка:</b> ${esc(v.note)}</div>` : ''}
     ${v.amenities && v.amenities.length ? `<h4>Удобства</h4><div class="am">${v.amenities.map(a => `<span>${esc(a)}</span>`).join('')}</div>` : ''}
@@ -884,10 +903,11 @@ const P = (la, lo) => [(lo - LON0) * KX, (LAT0 - la) * KY];   // в киломе
    улицы, холмы и застройка нарисованы по нему же в картинки map/patong-*.png. */
 const PATONG_DET = { bbox: [14.886, 44.87, 2.99, 4.358], light: 'map/patong-light.png', dark: 'map/patong-dark.png' };
 const PATONG_COAST = [[7.9141, 98.29146], [7.9136, 98.29184], [7.91311, 98.29169], [7.91261, 98.29252], [7.91212, 98.2933], [7.91162, 98.29359], [7.91113, 98.29413], [7.91064, 98.295], [7.91014, 98.29568], [7.90965, 98.29603], [7.90915, 98.29628], [7.90866, 98.29642], [7.90816, 98.29601], [7.90767, 98.2963], [7.90718, 98.2965], [7.90668, 98.29706], [7.90619, 98.2971], [7.90569, 98.2971], [7.9052, 98.29702], [7.90471, 98.297], [7.90421, 98.29694], [7.90372, 98.29687], [7.90322, 98.29681], [7.90273, 98.29677], [7.90223, 98.29669], [7.90174, 98.29665], [7.90125, 98.29654], [7.90075, 98.29646], [7.90026, 98.29638], [7.89976, 98.2963], [7.89927, 98.29619], [7.89877, 98.29607], [7.89828, 98.29595], [7.89779, 98.29582], [7.89729, 98.2957], [7.8968, 98.29545], [7.8963, 98.29541], [7.89581, 98.29522], [7.89532, 98.29506], [7.89482, 98.29487], [7.89433, 98.29471], [7.89383, 98.2945], [7.89334, 98.29429], [7.89284, 98.29405], [7.89235, 98.29382], [7.89186, 98.29357], [7.89136, 98.29332], [7.89087, 98.2931], [7.89037, 98.29283], [7.88988, 98.29252], [7.88938, 98.29217], [7.88889, 98.29184], [7.8884, 98.29144], [7.8879, 98.29111], [7.88741, 98.29068], [7.88691, 98.2901], [7.88642, 98.28983]];
+/* Юг (Карон — Ката — Най Харн — Чалонг) снят со скриншота Google Maps (привязка по точке 7.8260278, 98.3368056). */
+const SOUTH_COAST = [[7.8651, 98.2824], [7.8635, 98.2837], [7.8616, 98.2831], [7.8605, 98.2831], [7.8595, 98.2837], [7.8585, 98.2864], [7.8585, 98.2891], [7.8557, 98.2891], [7.855, 98.29], [7.8549, 98.2912], [7.8537, 98.2916], [7.8532, 98.2923], [7.8532, 98.2939], [7.8542, 98.2952], [7.8514, 98.2949], [7.8508, 98.2933], [7.8502, 98.2928], [7.8488, 98.2927], [7.8473, 98.2917], [7.8457, 98.2917], [7.8427, 98.2945], [7.8416, 98.2948], [7.8409, 98.2954], [7.8406, 98.2965], [7.8398, 98.2974], [7.8398, 98.2986], [7.8391, 98.2987], [7.8382, 98.2976], [7.839, 98.297], [7.8393, 98.2962], [7.839, 98.2951], [7.8385, 98.2946], [7.83, 98.2947], [7.8294, 98.2945], [7.8291, 98.2936], [7.8272, 98.291], [7.8255, 98.2903], [7.8246, 98.2903], [7.8234, 98.2913], [7.8234, 98.2923], [7.8238, 98.2929], [7.8234, 98.2952], [7.8217, 98.2962], [7.8206, 98.2973], [7.8203, 98.298], [7.8195, 98.2985], [7.8163, 98.2995], [7.8149, 98.2993], [7.8141, 98.2986], [7.814, 98.2977], [7.8133, 98.2967], [7.8109, 98.2965], [7.8101, 98.297], [7.8078, 98.2971], [7.8063, 98.2985], [7.806, 98.2993], [7.8039, 98.2994], [7.8032, 98.2991], [7.803, 98.2983], [7.8015, 98.2969], [7.8001, 98.2968], [7.7985, 98.2959], [7.7972, 98.2958], [7.7937, 98.2936], [7.7929, 98.2925], [7.7924, 98.2907], [7.7922, 98.2864], [7.7913, 98.2858], [7.7887, 98.2854], [7.7877, 98.286], [7.7874, 98.2866], [7.7872, 98.2894], [7.7876, 98.2912], [7.787, 98.2917], [7.7849, 98.2912], [7.7828, 98.2887], [7.781, 98.288], [7.779, 98.2881], [7.7784, 98.2886], [7.7767, 98.2889], [7.776, 98.2899], [7.7762, 98.2937], [7.7779, 98.2959], [7.7779, 98.2974], [7.7772, 98.2985], [7.7771, 98.3003], [7.7777, 98.3029], [7.7783, 98.3042], [7.7773, 98.3056], [7.7773, 98.3065], [7.7786, 98.3079], [7.777, 98.308], [7.7764, 98.3086], [7.7762, 98.3095], [7.7717, 98.3056], [7.7702, 98.3055], [7.7699, 98.3043], [7.7688, 98.3028], [7.7674, 98.3021], [7.7657, 98.3021], [7.7642, 98.3028], [7.7629, 98.3043], [7.7613, 98.3046], [7.7607, 98.3051], [7.7602, 98.3078], [7.7589, 98.3086], [7.7583, 98.3099], [7.7583, 98.3119], [7.7592, 98.313], [7.7593, 98.3147], [7.7613, 98.3165], [7.7617, 98.3185], [7.7622, 98.3193], [7.7643, 98.3195], [7.7674, 98.3176], [7.7695, 98.3186], [7.7709, 98.3201], [7.7736, 98.3247], [7.7758, 98.3299], [7.7757, 98.3321], [7.7751, 98.3329], [7.7751, 98.3347], [7.776, 98.3359], [7.777, 98.3362], [7.7777, 98.3373], [7.7799, 98.3384], [7.7823, 98.3382], [7.7835, 98.3369], [7.7848, 98.3362], [7.7863, 98.3336], [7.7891, 98.3332], [7.7904, 98.3336], [7.791, 98.3343], [7.7925, 98.3345], [7.7962, 98.3363], [7.7965, 98.3373], [7.7971, 98.3378], [7.7995, 98.3379], [7.8007, 98.3376], [7.8069, 98.3392], [7.8163, 98.3436], [7.8231, 98.3453], [7.8255, 98.3468], [7.8273, 98.3487], [7.8284, 98.3488], [7.8293, 98.3484], [7.8285, 98.3495], [7.8285, 98.3508], [7.8302, 98.3535], [7.8313, 98.3538], [7.8333, 98.3526], [7.8335, 98.3539], [7.8321, 98.3557], [7.832, 98.3596], [7.8364, 98.3641], [7.8385, 98.3649], [7.8394, 98.3675]];
 const COAST = [[8.197,98.300],[8.170,98.285],[8.120,98.290],[8.080,98.293],[8.040,98.276],[8.010,98.279],[7.990,98.283],[7.975,98.276],
-  [7.965,98.271],[7.955,98.280],[7.935,98.276],...PATONG_COAST,[7.875,98.272],[7.866,98.2815],[7.858,98.2895],[7.856,98.2932],[7.848,98.2930],
-  [7.838,98.2933],[7.830,98.2930],[7.8265,98.2915],[7.8235,98.2955],[7.8195,98.2972],[7.8150,98.2965],[7.8115,98.2935],[7.8085,98.2975],[7.8050,98.2985],[7.795,98.299],[7.778,98.302],[7.762,98.302],[7.757,98.311],[7.765,98.325],[7.776,98.331],
-  [7.790,98.336],[7.805,98.346],[7.815,98.355],[7.825,98.366],[7.830,98.381],[7.810,98.395],[7.801,98.410],[7.815,98.416],[7.840,98.408],
+  [7.965,98.271],[7.955,98.280],[7.935,98.276],...PATONG_COAST,[7.875,98.272],...SOUTH_COAST,
+  [7.830,98.381],[7.810,98.395],[7.801,98.410],[7.815,98.416],[7.840,98.408],
   [7.856,98.405],[7.870,98.411],[7.886,98.406],[7.905,98.411],[7.930,98.401],[7.960,98.415],[7.990,98.411],[8.020,98.430],[8.050,98.436],
   [8.080,98.430],[8.110,98.402],[8.140,98.372],[8.170,98.342],[8.190,98.320]];
 const MAINLAND = [[8.40,98.05],[8.40,98.70],[8.222,98.70],[8.214,98.46],[8.212,98.36],[8.209,98.30],[8.214,98.22],[8.225,98.05]];
@@ -903,7 +923,7 @@ const ROADS = [
   [[7.885,98.386],[7.862,98.401]]
 ];
 const AREAS = [['Патонг',7.904,98.313],['Камала',7.957,98.298],['Карон',7.849,98.309],['Ката',7.815,98.314],['Равай',7.783,98.339],
-  ['Чалонг',7.833,98.349],['Пхукет-таун',7.902,98.392],['Кату',7.917,98.341],['Таланг',8.035,98.352],['Банг Тао',8.002,98.302],
+  ['Чалонг',7.842,98.346],['Пхукет-таун',7.902,98.392],['Кату',7.917,98.341],['Таланг',8.035,98.352],['Банг Тао',8.002,98.302],
   ['Май Кхао',8.160,98.306],['Найтон',8.058,98.297],['Кейп Панва',7.815,98.398]];
 const KARON_TOWN = [
   [[7.8570,98.2950],[7.8572,98.2990],[7.8500,98.3010],[7.8440,98.3020],[7.8360,98.3005],[7.8300,98.2990],[7.8300,98.2948],[7.8400,98.2945],[7.8500,98.2947]],
