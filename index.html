@@ -245,6 +245,7 @@ const TRIP = {
   people: 5,
   ppMax: 120000,
   rate: 2.3967,
+  usd: 80.9734,
   rateNote: 'курсу ЦБ РФ на 3 ноября 2026'
 };
 const SYNC = { api: 'https://jsonblob.com/api/jsonBlob/', id: '' };
@@ -280,6 +281,17 @@ const VILLAS = [
     link:'https://drive.google.com/drive/folders/1ZAo-y9fICq3XCMV9JzOyXpmEtpOIEBLE', linkText:'Все фото на Google Диске',
     map:'https://maps.app.goo.gl/aeYUno2LHy1DUsgj7',
     desc:'Вилла с тремя спальнями на Чалонге, рядом с районом Ката. По фото — свой бассейн во дворе за забором, раздвижные двери из гостиной прямо к воде.' },
+  { id:'rawai-lora', name:'Вилла Lora', area:'Равай', lat:7.808948, lng:98.332014,
+    priceUsd:6000, bedrooms:3, baths:3, beds:'2 king size и 1 queen size', guests:6, pool:true, poolNote:'свой, с беседкой',
+    seaText:'10 мин на машине до Каты, Карона и Най Харна',
+    ride:[['Пляжи Ката, Карон, Най Харн (на машине)', 10], ['Аэропорт (на машине)', 45]],
+    photos:['photos/lora-01.jpg','photos/lora-02.jpg','photos/lora-03.jpg','photos/lora-04.jpg','photos/lora-05.jpg','photos/lora-06.jpg','photos/lora-07.jpg','photos/lora-08.jpg','photos/lora-09.jpg','photos/lora-10.jpg','photos/lora-11.jpg','photos/lora-12.jpg','photos/lora-13.jpg','photos/lora-14.jpg','photos/lora-15.jpg','photos/lora-16.jpg'],
+    desc:'Вилла с 3 спальнями и частным бассейном на юге Пхукета, рядом с пляжем Равай, между Чалонгом и Най Харном. Светлая гостиная с открытой планировкой, кухня, из каждой спальни выход прямо к бассейну и террасе. Вокруг сад, полная приватность.',
+    amenities:['Свой бассейн','Сад и беседка','Терраса с шезлонгами','Электричество и вода включены','Уборка и смена белья каждые 3 дня','Уход за бассейном и садом','Wi‑Fi, кабельное ТВ','Кондиционеры','Круглосуточная охрана','Бесплатная парковка','Кухня с духовкой','Стиральная машина','Сейф, утюг, фен'],
+    layout:['Спальня 1 — кровать king size','Спальня 2 — кровать king size','Спальня 3 — кровать queen size','3 ванные комнаты, одна с каменной ванной'],
+    pros:['Всё включено: свет, вода, уборка, бассейн','Полная приватность, сад'],
+    cons:['В пик сезона минимальный срок — 12 ночей, у нас 11','Вечеринки запрещены','Залог 10 000 ฿ наличными'],
+    note:'В пик сезона минимальный срок аренды — 12 ночей, а у нас 11: уточнить у агента. Заезд с 15:00, выезд до 12:00, залог 10 000 ฿ наличными. Внутри не курить, без животных и вечеринок. Цена указана в долларах: $6 000.' },
   { id:'patong-urban-oasis', name:'Urban Oasis Villa', area:'Патонг', lat:7.879417, lng:98.294306,
     priceThb:227000, bedrooms:4, pool:true, poolNote:'свой, с джакузи',
     photos:[], link:'https://amo.si/K/ZTQFJO/ZOO2OO', linkText:'Объявление и фото (ссылка 1)', link2:'https://amo.si/K/ZTIZ4A/ZOGSUY', link2Text:'Объявление и фото (ссылка 2)',
@@ -461,7 +473,8 @@ const beaches = PLACES.filter(p => p.type === 'beach');
 const bangla = PLACES.find(p => p.id === 'bangla');
 VILLAS.forEach((v, idx) => {
   v.imgs = (v.photos && v.photos.length) ? v.photos : [ph(idx, 0, v.link ? 'Фото — по ссылке в карточке' : 'Фото скоро будут')];
-  v.thb = v.priceThb; v.total = v.priceThb * TRIP.rate;
+  if(v.priceUsd) v.priceThb = Math.round(v.priceUsd * TRIP.usd / TRIP.rate / 100) * 100;
+  v.thb = v.priceThb; v.total = v.priceUsd ? v.priceUsd * TRIP.usd : v.priceThb * TRIP.rate;
   v.nightThb = v.priceThb / TRIP.nights; v.night = v.total / TRIP.nights;
   v.pp = v.total / TRIP.people;
   const nb = beaches.map(b => ({ b, d: dist(v, b) })).sort((a, b) => a.d - b.d)[0];
@@ -469,6 +482,8 @@ VILLAS.forEach((v, idx) => {
   v.toBangla = bangla ? dist(v, bangla) : null;
   v.fit = v.pp <= TRIP.ppMax ? 'ok' : v.pp <= TRIP.ppMax * 1.1 ? 'mid' : 'over';
 });
+const usd = n => '$' + Math.round(n).toLocaleString('ru-RU');
+const mainP = v => v.priceUsd ? usd(v.priceUsd) : thb(v.thb);
 const seaTxt = v => v.seaText ? v.seaText : v.seaM != null ? km(v.seaM / 1000) + ' до моря' : '≈\u00a0' + km(v.beach) + ' до пляжа';
 function facts(v, full){
   const f = [v.bedrooms ? `${v.bedrooms} спальни` : 'спальни — уточнить'];
@@ -518,7 +533,7 @@ function card(v){
   const r = favs.indexOf(v.id);
   return `<article class="card">${gallery(v)}${heartBtn(v)}<span class="badge ${v.fit}">${FIT[v.fit]}</span>${r > -1 ? `<span class="rank">${r + 1}</span>` : ''}</div>
   <div class="body" data-open="${v.id}">
-    <div class="r1"><h3>${esc(v.name)}</h3><div class="price"><b>${thb(v.thb)}</b><small>≈ ${rub(v.total)} за ${TRIP.nights} ночей</small></div></div>
+    <div class="r1"><h3>${esc(v.name)}</h3><div class="price"><b>${mainP(v)}</b><small>${v.priceUsd ? '≈ ' + thb(v.thb) + ' · ' : ''}≈ ${rub(v.total)} за ${TRIP.nights} ночей</small></div></div>
     <div class="area"><svg class="i"><use href="#i-pin"/></svg>${esc(v.area)} · ${seaTxt(v)}${v.toBangla != null && v.toBangla < 4 ? ' · ' + km(v.toBangla) + ' до Bangla' : ''}</div>
     <ul class="facts">${facts(v)}</ul>
     <div class="tot"><span>Ночь <b>${thb(v.nightThb)}</b> · ${rub(v.night)}</span><span>На ${TRIP.people}: <b>${rub(v.pp)}</b> с чел.</span></div>
@@ -553,10 +568,10 @@ function openSheet(id){
   <div class="shb">
     <div class="r1"><div><div class="area"><svg class="i"><use href="#i-pin"/></svg>${esc(v.area)} · ${seaTxt(v)}</div><h2>${esc(v.name)}</h2></div>
       ${heartBtn(v, true)}</div>
-    <div class="pbox"><div><small>За ${TRIP.nights} ночей</small><b>${thb(v.thb)}</b><em>≈ ${rub(v.total)}</em></div>
+    <div class="pbox"><div><small>За ${TRIP.nights} ночей</small><b>${mainP(v)}</b><em>${v.priceUsd ? '≈ ' + thb(v.thb) + '<br>' : ''}≈ ${rub(v.total)}</em></div>
       <div><small>За ночь</small><b>${thb(v.nightThb)}</b><em>≈ ${rub(v.night)}</em></div>
       <div><small>С человека (на ${TRIP.people})</small><b>${rub(v.pp)}</b><em>≈ ${thb(v.pp / TRIP.rate)}</em></div></div>
-    <p class="rate">Рубли — по ${TRIP.rateNote}: ${TRIP.rate.toFixed(2).replace('.', ',')} ₽ за бат.</p>
+    <p class="rate">Рубли — по ${TRIP.rateNote}: ${TRIP.rate.toFixed(2).replace('.', ',')} ₽ за бат${v.priceUsd ? ', ' + TRIP.usd.toFixed(2).replace('.', ',') + ' ₽ за доллар' : ''}.</p>
     <ul class="facts">${facts(v, true)}</ul>
     <h4>Кому нравится</h4><div class="lk" data-lk="${v.id}" data-full="1" style="margin-top:0">${likersHTML(v.id, true)}</div>
     ${v.desc ? `<p class="desc">${esc(v.desc)}</p>` : ''}
@@ -853,7 +868,7 @@ function renderFav(){
     $('#cmp').innerHTML = ''; return;
   }
   $('#flist').innerHTML = items.map((v, i) => `<div class="fi"><span class="n">${i + 1}</span><img src="${esc(v.imgs[0])}" alt="">
-    <div data-open="${v.id}" style="cursor:pointer"><h3>${esc(v.name)}</h3><small>${esc(v.area)} · ${thb(v.thb)} · ${rub(v.pp)} с чел.</small></div>
+    <div data-open="${v.id}" style="cursor:pointer"><h3>${esc(v.name)}</h3><small>${esc(v.area)} · ${mainP(v)} · ${rub(v.pp)} с чел.</small></div>
     <div class="mv"><button class="ib" data-mv="${v.id}" data-d="-1" aria-label="Выше"><svg class="i"><use href="#i-up"/></svg></button><button class="ib" data-mv="${v.id}" data-d="1" aria-label="Ниже"><svg class="i"><use href="#i-down"/></svg></button></div></div>`).join('');
   if(items.length < 2){ $('#cmp').innerHTML = ''; return; }
   const rows = [
@@ -870,7 +885,7 @@ function renderFav(){
 function favText(){
   const who = $('#who').value.trim();
   const lines = favs.map((id, i) => { const v = VILLAS.find(x => x.id === id);
-    return `${i + 1}. ${v.name} (${v.area}) — ${thb(v.thb)} ≈ ${rub(v.total)} за ${TRIP.nights} ноч., на ${TRIP.people}: ${rub(v.pp)} с чел.${v.link ? '\n   ' + v.link : ''}`; });
+    return `${i + 1}. ${v.name} (${v.area}) — ${mainP(v)} ≈ ${rub(v.total)} за ${TRIP.nights} ноч., на ${TRIP.people}: ${rub(v.pp)} с чел.${v.link ? '\n   ' + v.link : ''}`; });
   return `Мой выбор вилл на Пхукете${who ? ' — ' + who : ''}:\n` + lines.join('\n');
 }
 $('#who').value = myName;
@@ -1180,7 +1195,7 @@ function selectVilla(id, zoom){
   const v = VILLAS.find(x => x.id === id); if(!v) return;
   sel = id; tipId = null; drawVillas();
   $('#peek').innerHTML = `<img src="${esc(v.imgs[0])}" alt=""><div><h3>${esc(v.name)}</h3>
-    <div class="area">${esc(v.area)} · ${seaTxt(v)}${v.approx ? ' · ' + (v.approxText || 'точка примерная') : ''}</div><div style="margin-top:4px;font-size:14px"><b>${thb(v.thb)}</b> ≈ ${rub(v.total)} · ${rub(v.pp)} с чел.</div>
+    <div class="area">${esc(v.area)} · ${seaTxt(v)}${v.approx ? ' · ' + (v.approxText || 'точка примерная') : ''}</div><div style="margin-top:4px;font-size:14px"><b>${mainP(v)}</b> ≈ ${rub(v.total)} · ${rub(v.pp)} с чел.</div>
     <button class="chip" data-open="${v.id}" style="margin-top:8px;min-height:34px;padding:6px 12px">Подробнее</button></div>
     <button class="x" data-unpeek aria-label="Закрыть" style="width:30px;height:30px"><svg class="i" style="width:16px;height:16px"><use href="#i-x"/></svg></button>`;
   $('#peek').classList.add('on'); syncMapUI();
