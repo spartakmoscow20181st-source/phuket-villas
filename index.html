@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Виллы на Пхукете</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&family=Unbounded:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+:root{--bg:#f5f3ee;--card:#fff;--ink:#13242a;--mute:#5e6e73;--line:#e3dfd4;--sea:#0b5d63;--sea-ink:#fff;--soft:#e6f1ef;
+--coral:#ff6a45;--sun:#ffc23d;--ok:#1d9466;--navh:64px;--sb:env(safe-area-inset-bottom,0px);--st:env(safe-area-inset-top,0px)}
+:root[data-theme=dark]{--bg:#0b1618;--card:#13252a;--ink:#e8f1f0;--mute:#93a8a9;--line:#23393d;--sea:#147a7d;--soft:#173238}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#0b1618;--card:#13252a;--ink:#e8f1f0;--mute:#93a8a9;--line:#23393d;--sea:#147a7d;--soft:#173238}}
+*{box-sizing:border-box;min-width:0;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Manrope,system-ui,sans-serif;overflow-x:clip}
+h1,h2,h3{font-family:Unbounded,Manrope,sans-serif;line-height:1.1;margin:0;text-wrap:balance}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.view{display:none;padding-bottom:calc(var(--navh) + var(--sb) + 16px)}
+.view.on{display:block}
+/* шапка */
+.hero{background:var(--sea);color:var(--sea-ink);padding:calc(22px + var(--st)) 16px 20px;position:relative;overflow:hidden}
+.hero h1{font-size:clamp(24px,6.4vw,34px);max-width:16ch}
+.hero p{margin:6px 0 0;opacity:.85;font-size:15px}
+.hero .wave{position:absolute;right:-30px;bottom:-12px;width:190px;opacity:.18}
+.stats{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.stats span{background:rgba(255,255,255,.14);border-radius:999px;padding:5px 11px;font-size:13px;font-weight:700;white-space:nowrap}
+/* фильтры */
+.bar{position:sticky;top:0;z-index:20;background:var(--bg);padding:10px 0 8px;border-bottom:1px solid var(--line)}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:0 16px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;border:1px solid var(--line);background:var(--card);border-radius:999px;padding:8px 14px;font-size:14px;font-weight:700;min-height:38px;white-space:nowrap}
+.chip.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.row2{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 16px 0;font-size:13px;color:var(--mute)}
+select{border:1px solid var(--line);background:var(--card);border-radius:10px;padding:7px 10px;font-size:14px;font-weight:700}
+/* карточки */
+.grid{display:grid;gap:16px;padding:16px;grid-template-columns:minmax(0,1fr);max-width:1100px;margin:0 auto}
+@media(min-width:700px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.card{background:var(--card);border-radius:20px;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,.05),0 8px 24px -14px rgba(0,0,0,.25)}
+.galw{position:relative}
+.gal{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;aspect-ratio:16/10;background:var(--soft)}
+.gal::-webkit-scrollbar{display:none}
+.gal img{flex:0 0 100%;width:100%;height:100%;object-fit:cover;scroll-snap-align:start;display:block}
+.cnt{position:absolute;right:10px;bottom:10px;background:rgba(0,0,0,.55);color:#fff;font-size:12px;font-weight:700;padding:3px 8px;border-radius:8px}
+.heart{position:absolute;top:10px;right:10px;width:44px;height:44px;border-radius:50%;border:0;background:rgba(255,255,255,.92);color:#13242a;display:grid;place-items:center;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.heart.flat{position:static;flex:none;background:var(--card);color:var(--ink)}
+.heart.on{color:var(--coral)}.heart.on svg{fill:currentColor}
+.badge{position:absolute;top:12px;left:12px;font-size:12px;font-weight:800;padding:5px 10px;border-radius:999px;color:#fff;background:var(--ok)}
+.badge.mid{background:var(--sun);color:#3a2a00}.badge.over{background:var(--coral)}
+.rank{position:absolute;left:12px;bottom:12px;background:var(--coral);color:#fff;font:700 13px Unbounded,sans-serif;width:30px;height:30px;border-radius:50%;display:grid;place-items:center}
+.body{padding:14px 16px 16px;cursor:pointer}
+.r1{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.r1 h3{font-size:18px}
+.price{text-align:right;white-space:nowrap}
+.price b{font-size:18px}.price small{display:block;color:var(--mute);font-size:12px}
+.area{color:var(--mute);font-size:14px;margin-top:4px;display:flex;align-items:center;gap:4px}
+.area svg{width:15px;height:15px}
+.facts{display:flex;flex-wrap:wrap;gap:6px;list-style:none;padding:0;margin:12px 0 0}
+.facts li{background:var(--soft);border-radius:8px;padding:4px 9px;font-size:13px;font-weight:700;white-space:nowrap}
+.tot{display:flex;justify-content:space-between;gap:10px;margin-top:12px;padding-top:12px;border-top:1px dashed var(--line);font-size:14px}
+.tot b{white-space:nowrap}.tot span{color:var(--mute)}
+.empty{padding:40px 20px;text-align:center;color:var(--mute)}
+.demo{font-size:13px;color:var(--mute);text-align:center;padding:0 16px}
+/* нижняя навигация */
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:50;display:grid;grid-template-columns:repeat(3,1fr);background:var(--card);border-top:1px solid var(--line);height:calc(var(--navh) + var(--sb));padding-bottom:var(--sb)}
+nav.tabs button{border:0;background:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:12px;font-weight:700;color:var(--mute);position:relative}
+nav.tabs button.on{color:var(--sea)}
+:root[data-theme=dark] nav.tabs button.on{color:#5fd0c8}
+nav.tabs em{position:absolute;top:8px;left:calc(50% + 6px);background:var(--coral);color:#fff;font-style:normal;font-size:11px;min-width:18px;height:18px;border-radius:9px;display:grid;place-items:center;padding:0 5px}
+nav.tabs em:empty{display:none}
+/* карта */
+#mapView{padding:0}
+#map{position:fixed;left:0;right:0;top:0;bottom:calc(var(--navh) + var(--sb));background:var(--soft);z-index:1}
+.layers{position:fixed;top:calc(10px + var(--st));left:0;right:0;z-index:30}
+.layers .chip{box-shadow:0 2px 10px rgba(0,0,0,.15)}
+.layers .chip i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:0}
+.vpin{position:absolute;transform:translate(-50%,-100%);background:var(--coral);color:#fff;font:800 12px Manrope,sans-serif;padding:5px 9px;border-radius:11px;white-space:nowrap;box-shadow:0 3px 10px rgba(0,0,0,.3);border:2px solid #fff}
+.vpin::after{content:"";position:absolute;left:50%;bottom:-7px;margin-left:-5px;border:5px solid transparent;border-top-color:#fff}
+.vpin.fav{background:#c2185b}.vpin.sel{background:var(--sea);transform:translate(-50%,-100%) scale(1.15);z-index:9}
+.ppin{position:absolute;transform:translate(-50%,-50%);width:28px;height:28px;border-radius:50%;border:2px solid #fff;display:grid;place-items:center;box-shadow:0 2px 6px rgba(0,0,0,.3)}
+.ppin svg{width:15px;height:15px;stroke:#fff;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.leaflet-popup-content{font:14px/1.4 Manrope,sans-serif;margin:10px 12px}
+.leaflet-popup-content b{display:block;font-size:15px}
+.peek{position:fixed;left:10px;right:10px;bottom:calc(var(--navh) + var(--sb) + 10px);z-index:40;background:var(--card);border-radius:18px;display:none;grid-template-columns:96px minmax(0,1fr);gap:12px;padding:10px;box-shadow:0 10px 30px rgba(0,0,0,.3);max-width:520px;margin:0 auto}
+.peek.on{display:grid}
+.peek img{width:96px;height:96px;border-radius:12px;object-fit:cover}
+.peek h3{font-size:15px;padding-right:30px}
+.peek .x{position:absolute;top:6px;right:6px}
+.mapmsg{position:fixed;inset:0;display:grid;place-items:center;text-align:center;padding:30px;color:var(--mute)}
+/* избранное */
+.head2{padding:calc(20px + var(--st)) 16px 6px;max-width:1100px;margin:0 auto}
+.head2 h2{font-size:26px}
+.head2 p{color:var(--mute);margin:6px 0 12px;font-size:15px}
+label.who{display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:700;color:var(--mute)}
+input{border:1px solid var(--line);background:var(--card);border-radius:12px;padding:11px 12px;font-size:16px}
+.flist{padding:6px 16px;display:grid;gap:10px;max-width:1100px;margin:0 auto}
+.fi{display:grid;grid-template-columns:34px 64px minmax(0,1fr) auto;gap:10px;align-items:center;background:var(--card);border-radius:16px;padding:8px}
+.fi .n{font:700 15px Unbounded,sans-serif;color:var(--coral);text-align:center}
+.fi img{width:64px;height:64px;border-radius:10px;object-fit:cover}
+.fi h3{font-size:14px}.fi small{color:var(--mute);font-size:13px}
+.mv{display:flex;flex-direction:column;gap:4px}
+.ib{width:44px;height:36px;border:1px solid var(--line);background:var(--bg);border-radius:10px;display:grid;place-items:center}
+.ib svg{width:17px;height:17px}
+.scroll{overflow-x:auto;padding:0 16px;max-width:1100px;margin:0 auto}
+table{border-collapse:collapse;width:100%;min-width:640px;font-size:14px;background:var(--card);border-radius:14px;overflow:hidden}
+th,td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+th{font-size:12px;color:var(--mute);font-weight:700}
+td.num,th.num{text-align:right}
+td.best{color:var(--ok);font-weight:800}
+h4{margin:22px 0 8px;font-size:15px}
+.sec{max-width:1100px;margin:0 auto;padding:0 16px}
+.acts{display:flex;flex-wrap:wrap;gap:10px;padding:16px;max-width:1100px;margin:0 auto}
+.btn{flex:1 1 160px;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;border-radius:14px;border:1px solid var(--line);background:var(--card);font-weight:800;font-size:15px;text-decoration:none;color:var(--ink);padding:0 14px}
+@media(max-width:480px){.btn{flex-basis:100%}}
+.btn.p{background:var(--sea);color:#fff;border-color:var(--sea)}
+.btn.c{background:var(--coral);color:#fff;border-color:var(--coral)}
+.toast{position:fixed;left:50%;bottom:calc(var(--navh) + var(--sb) + 18px);transform:translate(-50%,20px);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-weight:700;font-size:14px;white-space:nowrap;opacity:0;transition:.25s;z-index:200;pointer-events:none}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+/* карточка объекта */
+.sheet{position:fixed;inset:0;z-index:100;display:none}
+.sheet.on{display:block}
+.sheet .bd{position:absolute;inset:0;background:rgba(0,0,0,.45)}
+.sheet .pn{position:absolute;left:0;right:0;bottom:0;top:calc(36px + var(--st));background:var(--bg);border-radius:22px 22px 0 0;overflow-y:auto;overscroll-behavior:contain;max-width:760px;margin:0 auto;animation:up .28s ease-out}
+@keyframes up{from{transform:translateY(40px);opacity:.4}}
+@media(prefers-reduced-motion:reduce){.sheet .pn{animation:none}.toast{transition:none}}
+.sheet .gal{aspect-ratio:4/3}
+.x{width:40px;height:40px;border-radius:50%;border:0;background:rgba(0,0,0,.55);color:#fff;display:grid;place-items:center}
+.sheet .x{position:absolute;top:12px;right:12px;z-index:3}
+.shb{padding:16px 16px calc(24px + var(--sb))}
+.shb h2{font-size:24px;margin-top:2px}
+.pbox{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:14px}
+.pbox div{background:var(--card);border-radius:14px;padding:10px}
+.pbox small{display:block;color:var(--mute);font-size:12px}
+.pbox b{font-size:16px;white-space:nowrap}
+.desc{margin:14px 0 0}
+.am{display:flex;flex-wrap:wrap;gap:6px}
+.am span{border:1px solid var(--line);border-radius:999px;padding:4px 10px;font-size:13px}
+.pc{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+@media(max-width:480px){.pc{grid-template-columns:minmax(0,1fr)}}
+.pc ul{margin:0;padding-left:18px;font-size:14px}
+.pc h4{margin-top:14px}
+.note{margin-top:14px;background:#fff6dc;color:#4a3800;border-radius:14px;padding:12px;font-size:14px}
+:root[data-theme=dark] .note{background:#3a3014;color:#ffe9a8}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]) .note{background:#3a3014;color:#ffe9a8}}
+.near{list-style:none;padding:0;margin:0;font-size:14px}
+.near li{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid var(--line)}
+.near li b{white-space:nowrap}
+.near i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:8px}
+</style>
+</head>
+<body>
+
+<script>
+/* =====================================================================
+   ДАННЫЕ. Всё, что нужно поменять, — здесь.
+   TRIP   — параметры поездки (ночи и бюджет нужны для расчёта цен).
+   VILLAS — варианты жилья. photos: список URL картинок; пустой список → заглушки.
+            priceTotal: итоговая сумма за весь период, если известна (важнее pricePerNight).
+   PLACES — туристические места на карте. type: beach | sight | night | transport | shop
+   Ниже — ДЕМО-объекты: названия, цены, фото и ссылки выдуманы.
+   ===================================================================== */
+const TRIP = {
+  title: 'Где живём на Пхукете',
+  dates: '27 дек – 7 янв',
+  nights: 11,
+  guests: 6,
+  budgetMin: 450000,
+  budgetMax: 500000,
+  cur: '₽'
+};
+
+const VILLAS = [
+  { id:'v1', name:'Villa Baan Kaew', area:'Патонг', lat:7.9052, lng:98.3022,
+    pricePerNight:38000, priceTotal:null, bedrooms:3, beds:3, baths:3, guests:8, pool:true,
+    rating:4.9, reviews:87, source:'Airbnb', link:'https://www.airbnb.com/s/Patong--Phuket',
+    photos:[], desc:'Вилла на склоне над Калимом: панорамная терраса, свой бассейн 4×8 м, три спальни с ванными. До Bangla Road — 10 минут на такси.',
+    amenities:['Свой бассейн','Вид на море','Кухня','Wi‑Fi','Кондиционеры','Парковка','Уборка 2 раза в неделю'],
+    pros:['Вид на залив, салют на Новый год с террасы','Тихо, но близко к центру'], cons:['Крутой подъём — пешком тяжело'],
+    note:'Хозяин готов дать скидку 7% при оплате до 1 декабря.' },
+  { id:'v2', name:'Patong Hillside Pool Villa', area:'Патонг', lat:7.8885, lng:98.3058,
+    pricePerNight:41000, priceTotal:null, bedrooms:3, beds:4, baths:3, guests:8, pool:true,
+    rating:4.8, reviews:132, source:'Booking', link:'https://www.booking.com/searchresults.html?ss=Patong',
+    photos:[], desc:'Современная вилла в закрытом посёлке с охраной. Бассейн с джакузи, барбекю-зона, большая гостиная с выходом к воде.',
+    amenities:['Свой бассейн','Джакузи','Барбекю','Охрана','Wi‑Fi','Стиральная машина'],
+    pros:['Охраняемая территория','Много отзывов, высокий рейтинг'], cons:['Вида на море нет'], note:'' },
+  { id:'v3', name:'Tamarind House', area:'Патонг', lat:7.8992, lng:98.2998,
+    pricePerNight:47000, priceTotal:null, bedrooms:4, beds:4, baths:4, guests:10, pool:true,
+    rating:4.7, reviews:41, source:'Airbnb', link:'https://www.airbnb.com/s/Patong--Phuket',
+    photos:[], desc:'Большая вилла в пешей доступности от пляжа Патонг. Четыре спальни — можно разместить до 10 человек.',
+    amenities:['Свой бассейн','Пешком до пляжа','Кухня','Wi‑Fi','Кондиционеры'],
+    pros:['До пляжа пешком','Четвёртая спальня — запас'], cons:['Дороже бюджета','Шумно ночью'], note:'' },
+  { id:'v4', name:'Karon Sea Breeze', area:'Карон', lat:7.8425, lng:98.3010,
+    pricePerNight:36000, priceTotal:null, bedrooms:3, beds:3, baths:2, guests:6, pool:true,
+    rating:4.9, reviews:64, source:'Airbnb', link:'https://www.airbnb.com/s/Karon--Phuket',
+    photos:[], desc:'Уютная вилла на холме над Кароном: инфинити-бассейн и закаты над Андаманским морем.',
+    amenities:['Инфинити-бассейн','Вид на море','Кухня','Wi‑Fi','Парковка'],
+    pros:['Самый красивый вид','Дешевле аналогов в Патонге'], cons:['Ровно 6 мест','До Патонга 20 минут'], note:'' },
+  { id:'v5', name:'Kata Garden Villa', area:'Ката', lat:7.8178, lng:98.3035,
+    pricePerNight:33000, priceTotal:null, bedrooms:3, beds:3, baths:3, guests:7, pool:true,
+    rating:4.6, reviews:29, source:'Booking', link:'https://www.booking.com/searchresults.html?ss=Kata+Beach',
+    photos:[], desc:'Вилла в тропическом саду в 800 м от пляжа Ката. Спокойный район, хорош для отдыха днём.',
+    amenities:['Свой бассейн','Сад','Кухня','Wi‑Fi','Велосипеды'],
+    pros:['Самая выгодная','Спокойно, рядом лучшие пляжи'], cons:['Далеко от ночной жизни'], note:'' },
+  { id:'v6', name:'Kamala Ocean Villa', area:'Камала', lat:7.9505, lng:98.2885,
+    pricePerNight:44000, priceTotal:470000, bedrooms:3, beds:3, baths:3, guests:8, pool:true,
+    rating:5.0, reviews:18, source:'Airbnb', link:'https://www.airbnb.com/s/Kamala--Phuket',
+    photos:[], desc:'Новая вилла у пляжа Камала, рядом Phuket FantaSea и Café del Mar. Итоговая цена со скидкой за длительное проживание.',
+    amenities:['Свой бассейн','Рядом пляж','Кухня','Wi‑Fi','Тренажёр'],
+    pros:['Новая','Скидка за 11 ночей'], cons:['Мало отзывов'], note:'Цена уже со скидкой — подтверждена в переписке.' }
+];
+
+const PLACES = [
+  { id:'patong', name:'Пляж Патонг', type:'beach', lat:7.8961, lng:98.2960, desc:'Главный пляж, в Новый год — салют' },
+  { id:'kalim', name:'Пляж Калим', type:'beach', lat:7.9095, lng:98.2990, desc:'Тихая часть Патонга' },
+  { id:'freedom', name:'Фридом Бич', type:'beach', lat:7.8742, lng:98.2748, desc:'Добраться — на лодке из Патонга' },
+  { id:'karon', name:'Пляж Карон', type:'beach', lat:7.8448, lng:98.2944, desc:'Длинный пляж с «поющим» песком' },
+  { id:'kata', name:'Пляж Ката', type:'beach', lat:7.8206, lng:98.2976, desc:'Удобный пляж для купания' },
+  { id:'katanoi', name:'Ката Ной', type:'beach', lat:7.8090, lng:98.2985, desc:'Небольшой и красивый пляж' },
+  { id:'naiharn', name:'Пляж Най Харн', type:'beach', lat:7.7781, lng:98.3050, desc:'Один из лучших пляжей юга' },
+  { id:'kamala', name:'Пляж Камала', type:'beach', lat:7.9560, lng:98.2828, desc:'Спокойный пляж на западе' },
+  { id:'surin', name:'Пляж Сурин', type:'beach', lat:7.9767, lng:98.2797, desc:'Пляж с пляжными клубами' },
+  { id:'buddha', name:'Большой Будда', type:'sight', lat:7.8277, lng:98.3128, desc:'45-метровая статуя на холме, виды на остров' },
+  { id:'chalong', name:'Ват Чалонг', type:'sight', lat:7.8469, lng:98.3368, desc:'Главный буддийский храм острова' },
+  { id:'promthep', name:'Мыс Промтеп', type:'sight', lat:7.7618, lng:98.3057, desc:'Закат на самой южной точке' },
+  { id:'viewpoint', name:'Смотровая трёх пляжей', type:'sight', lat:7.7990, lng:98.3040, desc:'Вид на Ката Ной, Ката и Карон' },
+  { id:'oldtown', name:'Старый город Пхукета', type:'sight', lat:7.8846, lng:98.3887, desc:'Сино-португальские улочки и кафе' },
+  { id:'fantasea', name:'Phuket FantaSea', type:'sight', lat:7.9563, lng:98.2890, desc:'Вечернее шоу-парк' },
+  { id:'bangla', name:'Bangla Road', type:'night', lat:7.8935, lng:98.2985, desc:'Ночная улица: бары и клубы' },
+  { id:'naka', name:'Рынок Наканг', type:'night', lat:7.8655, lng:98.3668, desc:'Ночной рынок выходного дня' },
+  { id:'jungceylon', name:'Jungceylon', type:'shop', lat:7.8915, lng:98.2995, desc:'Торговый центр в Патонге' },
+  { id:'central', name:'Central Phuket', type:'shop', lat:7.8913, lng:98.3680, desc:'Самый большой ТЦ острова' },
+  { id:'hkt', name:'Аэропорт Пхукета (HKT)', type:'transport', lat:8.1132, lng:98.3169, desc:'Около 40–60 минут до Патонга' },
+  { id:'rassada', name:'Пирс Рассада', type:'transport', lat:7.8555, lng:98.4010, desc:'Паромы на Пхи-Пхи' },
+  { id:'chalongpier', name:'Пирс Чалонг', type:'transport', lat:7.8195, lng:98.3590, desc:'Катера на острова' }
+];
+</script>
+
+<section id="listView" class="view on">
+  <header class="hero">
+    <svg class="wave" viewBox="0 0 200 120"><path d="M0 70c25-20 50-20 75 0s50 20 75 0 50-20 75 0M0 100c25-20 50-20 75 0s50 20 75 0 50-20 75 0M120 40a28 28 0 1 1 56 0" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round"/></svg>
+    <h1 id="ttl">Где живём на Пхукете</h1>
+    <p id="sub"></p>
+    <div class="stats" id="stats"></div>
+  </header>
+  <div class="bar">
+    <div class="chips" id="filters"></div>
+    <div class="row2"><span id="shown"></span>
+      <select id="sort" aria-label="Сортировка">
+        <option value="price">Сначала дешевле</option>
+        <option value="beach">Ближе к пляжу</option>
+        <option value="rating">Выше рейтинг</option>
+        <option value="rooms">Больше спален</option>
+      </select>
+    </div>
+  </div>
+  <div class="grid" id="list"></div>
+  <p class="demo">Тестовая версия: объекты, цены и фото — демо-данные.</p>
+</section>
+
+<section id="mapView" class="view">
+  <div id="map"></div>
+  <div class="layers"><div class="chips" id="layers"></div></div>
+  <div class="peek" id="peek"></div>
+</section>
+
+<section id="favView" class="view">
+  <div class="head2">
+    <h2>Мой выбор</h2>
+    <p>Отмечайте сердечком понравившиеся варианты. Порядок — ваш приоритет, его можно менять стрелками. Потом отправьте список в общий чат.</p>
+    <label class="who">Ваше имя <input id="who" placeholder="Например, Артём" maxlength="30" autocomplete="off"></label>
+  </div>
+  <div class="flist" id="flist"></div>
+  <div id="cmp"></div>
+  <div class="acts" id="favActs">
+    <button class="btn c" id="shareBtn"><svg class="i"><use href="#i-share"/></svg>Отправить в чат</button>
+    <button class="btn" id="copyBtn">Скопировать текст</button>
+  </div>
+</section>
+
+<nav class="tabs">
+  <button data-tab="list" class="on"><svg class="i"><use href="#i-list"/></svg>Варианты</button>
+  <button data-tab="map"><svg class="i"><use href="#i-map"/></svg>Карта</button>
+  <button data-tab="fav"><svg class="i"><use href="#i-heart"/></svg>Мой выбор<em id="favN"></em></button>
+</nav>
+
+<div class="sheet" id="sheet"><div class="bd" data-close></div><div class="pn" id="pn"></div></div>
+<div class="toast" id="toast"></div>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></symbol>
+  <symbol id="i-list" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/></symbol>
+  <symbol id="i-map" viewBox="0 0 24 24"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2zM9 4v14M15 6v14"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s-6-5.6-6-11a6 6 0 0 1 12 0c0 5.4-6 11-6 11z"/><circle cx="12" cy="10" r="2"/></symbol>
+  <symbol id="i-share" viewBox="0 0 24 24"><path d="M4 13v7h16v-7M12 3v12M7 8l5-5 5 5"/></symbol>
+  <symbol id="i-ext" viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M18 14v6H4V6h6"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+  <symbol id="i-up" viewBox="0 0 24 24"><path d="m6 15 6-6 6 6"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+</svg>
+
+<script>
+{
+const $ = s => document.querySelector(s);
+const tg = window.Telegram && window.Telegram.WebApp;
+const inTG = !!(tg && tg.initData);
+
+/* ---------- Telegram ---------- */
+function applyTheme(){ if(inTG) document.documentElement.dataset.theme = tg.colorScheme === 'dark' ? 'dark' : 'light'; }
+if(inTG){
+  try{ tg.ready(); tg.expand(); applyTheme(); tg.onEvent('themeChanged', applyTheme); }catch(e){}
+}
+const haptic = () => { try{ inTG && tg.HapticFeedback.impactOccurred('light'); }catch(e){} };
+function openExt(url){ if(inTG){ try{ tg.openLink(url); return true; }catch(e){} } return false; }
+function openTgLink(url){ if(inTG){ try{ tg.openTelegramLink(url); return; }catch(e){} } location.href = url; }
+
+/* ---------- хранилище ---------- */
+const store = {
+  get(k, d){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; }catch(e){ return d; } },
+  set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+};
+let favs = store.get('phk-favs', []).filter(id => VILLAS.some(v => v.id === id));
+
+/* ---------- утилиты ---------- */
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const money = n => Math.round(n).toLocaleString('ru-RU') + ' ' + TRIP.cur;
+const km = d => d < 1 ? (Math.round(d * 20) * 50) + ' м' : d.toFixed(1).replace('.', ',') + ' км';
+function dist(a, b){
+  const R = 6371, r = Math.PI / 180, dLa = (b.lat - a.lat) * r, dLo = (b.lng - a.lng) * r;
+  const h = Math.sin(dLa / 2) ** 2 + Math.cos(a.lat * r) * Math.cos(b.lat * r) * Math.sin(dLo / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(h));
+}
+const CAT = {
+  beach:    { name:'Пляжи',     color:'#1aa3c4', svg:'<path d="M12 4a8 8 0 0 1 8 8H4a8 8 0 0 1 8-8zM12 12v8M8 20h8"/>' },
+  sight:    { name:'Места',     color:'#8e5bd6', svg:'<path d="M4 20h16M6 20v-9M18 20v-9M3 11l9-6 9 6M10 20v-5h4v5"/>' },
+  night:    { name:'Ночь и еда',color:'#e2457a', svg:'<path d="M6 4h12l-6 8zM12 12v7M8 20h8"/>' },
+  shop:     { name:'Шопинг',    color:'#e08a1e', svg:'<path d="M5 8h14l-1 12H6zM9 8a3 3 0 0 1 6 0"/>' },
+  transport:{ name:'Транспорт', color:'#4b5d67', svg:'<path d="M3 15l2 4h14l2-4zM12 4v11M12 5l6 8h-6"/>' }
+};
+
+/* заглушки фото (если photos пустой) */
+const PAL = [['#8fd3ea','#0b5d63','#f3dcae'],['#ffbf94','#127c80','#f6e5c6'],['#a7dccd','#0e4f58','#ecd8b2'],['#ffd884','#1a6f7a','#f2ddb8']];
+function ph(seed, i){
+  const p = PAL[(seed + i) % PAL.length], sx = 560 - i * 110;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${p[0]}"/><stop offset="1" stop-color="#fff3df"/></linearGradient></defs><rect width="800" height="500" fill="url(#g)"/><circle cx="${sx}" cy="110" r="44" fill="#fff" opacity=".75"/><rect y="300" width="800" height="200" fill="${p[1]}"/><path d="M0 312h800" stroke="#fff" stroke-width="6" opacity=".3"/><path d="M170 300V205l160-70 160 70v95z" fill="${p[2]}"/><path d="M150 212l180-88 180 88" fill="none" stroke="#5a3b28" stroke-width="16" stroke-linejoin="round"/><rect x="292" y="228" width="76" height="72" fill="#5a3b28" opacity=".85"/><rect x="410" y="232" width="56" height="40" fill="#fff" opacity=".7"/><rect x="430" y="340" width="260" height="64" rx="12" fill="#6fe0ea"/><path d="M700 300c-4-60 6-110 30-150M730 150c-30-10-60 0-75 18M730 150c25-22 55-22 70-8M730 150c-5-30 8-52 30-60" fill="none" stroke="#2f5d3a" stroke-width="9" stroke-linecap="round"/><text x="36" y="470" font-family="sans-serif" font-size="26" font-weight="700" fill="#fff" opacity=".85">Демо-фото ${i + 1}</text></svg>`;
+  return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+}
+
+/* производные поля */
+const beaches = PLACES.filter(p => p.type === 'beach');
+const bangla = PLACES.find(p => p.id === 'bangla');
+VILLAS.forEach((v, idx) => {
+  v.imgs = (v.photos && v.photos.length) ? v.photos : [0, 1, 2, 3].map(i => ph(idx, i));
+  v.total = v.priceTotal || v.pricePerNight * TRIP.nights;
+  v.night = v.priceTotal ? v.priceTotal / TRIP.nights : v.pricePerNight;
+  v.pp = Math.round(v.total / TRIP.guests / 100) * 100;
+  const nb = beaches.map(b => ({ b, d: dist(v, b) })).sort((a, b) => a.d - b.d)[0];
+  v.beach = nb ? nb.d : 99; v.beachName = nb ? nb.b.name : '';
+  v.toBangla = bangla ? dist(v, bangla) : null;
+  v.fit = v.total <= TRIP.budgetMax ? 'ok' : v.total <= TRIP.budgetMax * 1.1 ? 'mid' : 'over';
+});
+const FIT = { ok:'В бюджете', mid:'Чуть выше бюджета', over:'Дороже бюджета' };
+
+/* ---------- шапка ---------- */
+$('#ttl').textContent = TRIP.title;
+$('#sub').textContent = `${TRIP.dates} · ${TRIP.nights} ночей · ${TRIP.guests}+ человек`;
+$('#stats').innerHTML = [
+  `${VILLAS.length} вариантов`,
+  `бюджет ${Math.round(TRIP.budgetMin / 1000)}–${Math.round(TRIP.budgetMax / 1000)} тыс ${TRIP.cur}`,
+  `от ${money(Math.min(...VILLAS.map(v => v.total)))}`
+].map(s => `<span>${esc(s)}</span>`).join('');
+
+/* ---------- фильтры ---------- */
+const areas = [...new Set(VILLAS.map(v => v.area))];
+const F = store.get('phk-filter', { area:'all', budget:false, pool:false, rooms3:false, sort:'price' });
+if(F.area !== 'all' && !areas.includes(F.area)) F.area = 'all';
+function renderFilters(){
+  const a = [['all', 'Все районы'], ...areas.map(x => [x, x])].map(([k, t]) =>
+    `<button class="chip ${F.area === k ? 'on' : ''}" data-area="${esc(k)}">${esc(t)}</button>`).join('');
+  const t = [['budget', 'В бюджете'], ['pool', 'Бассейн'], ['rooms3', '3+ спальни']].map(([k, t]) =>
+    `<button class="chip ${F[k] ? 'on' : ''}" data-flag="${k}">${t}</button>`).join('');
+  $('#filters').innerHTML = a + t;
+  $('#sort').value = F.sort;
+}
+function filtered(){
+  const s = { price:(a, b) => a.total - b.total, beach:(a, b) => a.beach - b.beach, rating:(a, b) => b.rating - a.rating, rooms:(a, b) => b.bedrooms - a.bedrooms }[F.sort];
+  return VILLAS.filter(v => (F.area === 'all' || v.area === F.area) && (!F.budget || v.fit === 'ok') && (!F.pool || v.pool) && (!F.rooms3 || v.bedrooms >= 3)).sort(s);
+}
+
+/* ---------- список ---------- */
+const heartBtn = v => `<button class="heart ${favs.includes(v.id) ? 'on' : ''}" data-fav="${v.id}" aria-label="В избранное"><svg class="i"><use href="#i-heart"/></svg></button>`;
+function gallery(v){
+  return `<div class="galw"><div class="gal" data-gal>${v.imgs.map((src, i) => `<img src="${esc(src)}" alt="${esc(v.name)}, фото ${i + 1}" loading="${i ? 'lazy' : 'eager'}">`).join('')}</div>
+    <span class="cnt">1/${v.imgs.length}</span>`;
+}
+function card(v){
+  const r = favs.indexOf(v.id);
+  return `<article class="card">${gallery(v)}${heartBtn(v)}<span class="badge ${v.fit}">${FIT[v.fit]}</span>${r > -1 ? `<span class="rank">${r + 1}</span>` : ''}</div>
+  <div class="body" data-open="${v.id}">
+    <div class="r1"><h3>${esc(v.name)}</h3><div class="price"><b>${money(v.night)}</b><small>за ночь</small></div></div>
+    <div class="area"><svg class="i"><use href="#i-pin"/></svg>${esc(v.area)} · ${km(v.beach)} до пляжа${v.toBangla != null ? ' · ' + km(v.toBangla) + ' до Bangla' : ''}</div>
+    <ul class="facts"><li>${v.bedrooms} спальни</li><li>${v.beds} кровати</li><li>до ${v.guests} гостей</li>${v.pool ? '<li>Бассейн</li>' : ''}<li>★ ${String(v.rating).replace('.', ',')} · ${v.reviews}</li></ul>
+    <div class="tot"><span>За ${TRIP.nights} ночей <b>${money(v.total)}</b></span><span>≈ <b>${money(v.pp)}</b> с чел.</span></div>
+  </div></article>`;
+}
+function renderList(){
+  const items = filtered();
+  $('#shown').textContent = `Показано ${items.length} из ${VILLAS.length}`;
+  $('#list').innerHTML = items.length ? items.map(card).join('') : `<div class="empty">Под фильтры ничего не подошло.<br><br><button class="chip" data-reset>Сбросить фильтры</button></div>`;
+  bindGalleries($('#list'));
+}
+function bindGalleries(root){
+  root.querySelectorAll('[data-gal]').forEach(g => g.addEventListener('scroll', () => {
+    const c = g.parentElement.querySelector('.cnt');
+    if(c) c.textContent = (Math.round(g.scrollLeft / g.clientWidth) + 1) + '/' + g.children.length;
+  }, { passive:true }));
+}
+
+/* ---------- карточка объекта ---------- */
+let openId = null;
+function openSheet(id){
+  const v = VILLAS.find(x => x.id === id); if(!v) return;
+  openId = id;
+  const near = PLACES.map(p => ({ p, d: dist(v, p) })).sort((a, b) => a.d - b.d).slice(0, 5);
+  const hkt = PLACES.find(p => p.id === 'hkt');
+  if(hkt && !near.some(n => n.p.id === 'hkt')) near.push({ p: hkt, d: dist(v, hkt) });
+  const gm = `https://www.google.com/maps/search/?api=1&query=${v.lat},${v.lng}`;
+  $('#pn').innerHTML = `<button class="x" data-close aria-label="Закрыть"><svg class="i"><use href="#i-x"/></svg></button>
+  ${gallery(v)}${''}<span class="badge ${v.fit}">${FIT[v.fit]}</span></div>
+  <div class="shb">
+    <div class="r1"><div><div class="area"><svg class="i"><use href="#i-pin"/></svg>${esc(v.area)} · ${esc(v.source)}</div><h2>${esc(v.name)}</h2></div>
+      <button class="heart flat ${favs.includes(v.id) ? 'on' : ''}" data-fav="${v.id}" aria-label="В избранное"><svg class="i"><use href="#i-heart"/></svg></button></div>
+    <div class="pbox"><div><small>За ночь</small><b>${money(v.night)}</b></div><div><small>За ${TRIP.nights} ночей</small><b>${money(v.total)}</b></div><div><small>С человека</small><b>${money(v.pp)}</b></div></div>
+    <ul class="facts"><li>${v.bedrooms} спальни</li><li>${v.beds} кровати</li><li>${v.baths} ванные</li><li>до ${v.guests} гостей</li>${v.pool ? '<li>Бассейн</li>' : ''}<li>★ ${String(v.rating).replace('.', ',')} · ${v.reviews} отзывов</li></ul>
+    ${v.desc ? `<p class="desc">${esc(v.desc)}</p>` : ''}
+    ${v.note ? `<div class="note"><b>Заметка:</b> ${esc(v.note)}</div>` : ''}
+    ${v.amenities && v.amenities.length ? `<h4>Удобства</h4><div class="am">${v.amenities.map(a => `<span>${esc(a)}</span>`).join('')}</div>` : ''}
+    <div class="pc"><div><h4>Плюсы</h4><ul>${(v.pros || []).map(x => `<li>${esc(x)}</li>`).join('') || '<li>—</li>'}</ul></div>
+      <div><h4>Минусы</h4><ul>${(v.cons || []).map(x => `<li>${esc(x)}</li>`).join('') || '<li>—</li>'}</ul></div></div>
+    <h4>Что рядом (по прямой)</h4>
+    <ul class="near">${near.map(n => `<li><span><i style="background:${CAT[n.p.type].color}"></i>${esc(n.p.name)}</span><b>${km(n.d)}</b></li>`).join('')}</ul>
+    <div class="acts" style="padding:18px 0 0">
+      ${v.link ? `<a class="btn p" data-ext href="${esc(v.link)}" target="_blank" rel="noopener">Открыть объявление<svg class="i"><use href="#i-ext"/></svg></a>` : ''}
+      <button class="btn" data-onmap="${v.id}"><svg class="i"><use href="#i-map"/></svg>На карте</button>
+      <a class="btn" data-ext href="${gm}" target="_blank" rel="noopener">Google Maps</a>
+    </div>
+  </div>`;
+  bindGalleries($('#pn'));
+  $('#sheet').classList.add('on');
+  $('#pn').scrollTop = 0;
+  document.body.style.overflow = 'hidden';
+  syncBack();
+}
+function closeSheet(){
+  $('#sheet').classList.remove('on'); openId = null;
+  document.body.style.overflow = ''; syncBack();
+}
+
+/* ---------- избранное ---------- */
+function toggleFav(id){
+  const i = favs.indexOf(id);
+  if(i > -1) favs.splice(i, 1); else favs.push(id);
+  store.set('phk-favs', favs); haptic();
+  toast(i > -1 ? 'Убрано из выбора' : 'Добавлено в «Мой выбор»');
+  refreshAll();
+}
+function moveFav(id, d){
+  const i = favs.indexOf(id), j = i + d;
+  if(i < 0 || j < 0 || j >= favs.length) return;
+  [favs[i], favs[j]] = [favs[j], favs[i]];
+  store.set('phk-favs', favs); renderFav(); renderList();
+}
+function renderFav(){
+  $('#favN').textContent = favs.length || '';
+  const items = favs.map(id => VILLAS.find(v => v.id === id));
+  $('#favActs').style.display = items.length ? '' : 'none';
+  if(!items.length){
+    $('#flist').innerHTML = `<div class="empty">Пока пусто. Откройте «Варианты» и отметьте сердечком то, что нравится.</div>`;
+    $('#cmp').innerHTML = ''; return;
+  }
+  $('#flist').innerHTML = items.map((v, i) => `<div class="fi"><span class="n">${i + 1}</span><img src="${esc(v.imgs[0])}" alt="">
+    <div data-open="${v.id}" style="cursor:pointer"><h3>${esc(v.name)}</h3><small>${esc(v.area)} · ${money(v.total)}</small></div>
+    <div class="mv"><button class="ib" data-mv="${v.id}" data-d="-1" aria-label="Выше"><svg class="i"><use href="#i-up"/></svg></button><button class="ib" data-mv="${v.id}" data-d="1" aria-label="Ниже"><svg class="i"><use href="#i-down"/></svg></button></div></div>`).join('');
+  if(items.length < 2){ $('#cmp').innerHTML = ''; return; }
+  const min = (k, inv) => { const a = items.map(v => v[k]); return inv ? Math.max(...a) : Math.min(...a); };
+  const rows = [
+    ['За период', v => money(v.total), 'total'], ['С человека', v => money(v.pp), 'pp'], ['За ночь', v => money(v.night), 'night'],
+    ['Спальни', v => v.bedrooms, 'bedrooms', 1], ['Гостей', v => v.guests, 'guests', 1], ['До пляжа', v => km(v.beach), 'beach'],
+    ['Рейтинг', v => String(v.rating).replace('.', ','), 'rating', 1], ['Бассейн', v => v.pool ? 'да' : 'нет']
+  ];
+  $('#cmp').innerHTML = `<div class="sec"><h4>Сравнение</h4></div><div class="scroll"><table><thead><tr><th></th>${items.map(v => `<th class="num">${esc(v.name)}</th>`).join('')}</tr></thead><tbody>
+    ${rows.map(([t, f, k, inv]) => { const best = k ? min(k, inv) : null;
+      return `<tr><th>${t}</th>${items.map(v => `<td class="num ${k && v[k] === best ? 'best' : ''}">${f(v)}</td>`).join('')}</tr>`; }).join('')}
+  </tbody></table></div>`;
+}
+function favText(){
+  const who = $('#who').value.trim();
+  const lines = favs.map((id, i) => { const v = VILLAS.find(x => x.id === id);
+    return `${i + 1}. ${v.name} (${v.area}) — ${money(v.total)} за ${TRIP.nights} ноч., ≈${money(v.pp)} с чел.${v.link ? '\n   ' + v.link : ''}`; });
+  return `Мой выбор вилл на Пхукете${who ? ' — ' + who : ''}:\n` + lines.join('\n');
+}
+$('#who').value = store.get('phk-who', '');
+$('#who').addEventListener('input', e => store.set('phk-who', e.target.value));
+$('#shareBtn').addEventListener('click', () => {
+  if(!favs.length) return;
+  const page = /^https?:/.test(location.href) ? location.href.split('#')[0] : '';
+  const first = VILLAS.find(v => v.id === favs[0]);
+  openTgLink('https://t.me/share/url?url=' + encodeURIComponent(page || (first && first.link) || 'https://t.me') + '&text=' + encodeURIComponent(favText()));
+});
+$('#copyBtn').addEventListener('click', async () => {
+  const t = favText();
+  try{ await navigator.clipboard.writeText(t); toast('Текст скопирован'); }
+  catch(e){ const a = document.createElement('textarea'); a.value = t; document.body.appendChild(a); a.select();
+    try{ document.execCommand('copy'); toast('Текст скопирован'); }catch(_){ toast('Не удалось скопировать'); } a.remove(); }
+});
+
+/* ---------- карта ---------- */
+let map = null, villaLayer = null, sel = null;
+const catLayers = {};
+const LAY = store.get('phk-layers', { villas:true, favOnly:false, beach:true, sight:true, night:true, shop:false, transport:true });
+function initMap(){
+  if(map) return true;
+  if(!window.L){ $('#mapView').insertAdjacentHTML('beforeend', '<div class="mapmsg">Карта не загрузилась — проверьте интернет и откройте страницу заново.</div>'); return false; }
+  map = L.map('map', { zoomControl:false, attributionControl:true }).setView([7.88, 98.32], 11);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+    { subdomains:'abcd', maxZoom:19, attribution:'© OpenStreetMap, © CARTO' }).addTo(map);
+  villaLayer = L.layerGroup();
+  Object.keys(CAT).forEach(k => {
+    catLayers[k] = L.layerGroup(PLACES.filter(p => p.type === k).map(p =>
+      L.marker([p.lat, p.lng], { icon: L.divIcon({ className:'', iconSize:[0, 0],
+        html:`<div class="ppin" style="background:${CAT[k].color}"><svg viewBox="0 0 24 24">${CAT[k].svg}</svg></div>` }) })
+      .bindPopup(`<b>${esc(p.name)}</b>${esc(p.desc || '')}<br><a href="https://www.google.com/maps/search/?api=1&query=${p.lat},${p.lng}" target="_blank" rel="noopener" data-ext>Google Maps</a>`)));
+  });
+  map.on('click', () => { sel = null; $('#peek').classList.remove('on'); drawVillas(); });
+  drawVillas(); applyLayers();
+  const pts = VILLAS.map(v => [v.lat, v.lng]);
+  if(pts.length) map.fitBounds(pts, { padding:[60, 60], maxZoom:13 });
+  return true;
+}
+function drawVillas(){
+  if(!map) return;
+  villaLayer.clearLayers();
+  const list = LAY.favOnly ? VILLAS.filter(v => favs.includes(v.id)) : filtered();
+  if(sel && !list.some(v => v.id === sel)) list.push(VILLAS.find(v => v.id === sel));
+  list.forEach(v => {
+    const cls = v.id === sel ? 'sel' : favs.includes(v.id) ? 'fav' : '';
+    const label = (favs.includes(v.id) ? '♥ ' : '') + Math.round(v.night / 1000) + ' тыс';
+    L.marker([v.lat, v.lng], { zIndexOffset: v.id === sel ? 1000 : 500, icon: L.divIcon({ className:'', iconSize:[0, 0], html:`<div class="vpin ${cls}">${label}</div>` }) })
+      .on('click', e => { L.DomEvent.stopPropagation(e); selectVilla(v.id); }).addTo(villaLayer);
+  });
+}
+function selectVilla(id, zoom){
+  const v = VILLAS.find(x => x.id === id); sel = id; drawVillas();
+  $('#peek').innerHTML = `<img src="${esc(v.imgs[0])}" alt=""><div><h3>${esc(v.name)}</h3>
+    <div class="area">${esc(v.area)} · ${km(v.beach)} до пляжа</div><div style="margin-top:4px;font-size:14px"><b>${money(v.night)}</b> / ночь · ${v.bedrooms} спальни</div>
+    <button class="chip" data-open="${v.id}" style="margin-top:8px;min-height:34px;padding:6px 12px">Подробнее</button></div>
+    <button class="x" data-unpeek aria-label="Закрыть" style="width:30px;height:30px"><svg class="i" style="width:16px;height:16px"><use href="#i-x"/></svg></button>`;
+  $('#peek').classList.add('on');
+  zoom ? map.setView([v.lat, v.lng], 15) : map.panTo([v.lat, v.lng]);
+}
+function renderLayers(){
+  const items = [['villas', 'Виллы', '#ff6a45'], ['favOnly', 'Только мой выбор', '#c2185b'], ...Object.entries(CAT).map(([k, c]) => [k, c.name, c.color])];
+  $('#layers').innerHTML = items.map(([k, t, c]) => `<button class="chip ${LAY[k] ? 'on' : ''}" data-layer="${k}"><i style="background:${c}"></i>${t}</button>`).join('');
+}
+function applyLayers(){
+  if(!map) return;
+  (LAY.villas || LAY.favOnly) ? villaLayer.addTo(map) : villaLayer.remove();
+  Object.keys(CAT).forEach(k => LAY[k] ? catLayers[k].addTo(map) : catLayers[k].remove());
+  drawVillas();
+}
+
+/* ---------- вкладки и навигация ---------- */
+let tab = 'list';
+function setTab(t){
+  tab = t;
+  document.querySelectorAll('.view').forEach(s => s.classList.toggle('on', s.id === t + 'View'));
+  document.querySelectorAll('nav.tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === t));
+  if(t === 'map' && initMap()) setTimeout(() => map.invalidateSize(), 60);
+  if(t === 'fav') renderFav();
+  window.scrollTo(0, 0); syncBack();
+}
+function syncBack(){
+  if(!inTG) return;
+  try{ (openId || tab !== 'list') ? tg.BackButton.show() : tg.BackButton.hide(); }catch(e){}
+}
+if(inTG){ try{ tg.BackButton.onClick(() => openId ? closeSheet() : setTab('list')); }catch(e){} }
+
+let tt;
+function toast(m){ const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(tt); tt = setTimeout(() => t.classList.remove('on'), 1600); }
+function refreshAll(){
+  renderList(); renderFav(); drawVillas();
+  if(openId){ const h = $('#pn').querySelectorAll('[data-fav]'); h.forEach(b => b.classList.toggle('on', favs.includes(openId))); }
+}
+
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-fav],[data-open],[data-close],[data-tab],[data-area],[data-flag],[data-reset],[data-mv],[data-layer],[data-onmap],[data-unpeek],[data-ext]');
+  if(!el) return;
+  const d = el.dataset;
+  if('fav' in d){ e.stopPropagation(); toggleFav(d.fav); }
+  else if('open' in d) openSheet(d.open);
+  else if('close' in d) closeSheet();
+  else if('tab' in d){ closeSheet(); setTab(d.tab); }
+  else if('area' in d){ F.area = d.area; store.set('phk-filter', F); renderFilters(); renderList(); drawVillas(); }
+  else if('flag' in d){ F[d.flag] = !F[d.flag]; store.set('phk-filter', F); renderFilters(); renderList(); drawVillas(); }
+  else if('reset' in d){ Object.assign(F, { area:'all', budget:false, pool:false, rooms3:false }); store.set('phk-filter', F); renderFilters(); renderList(); drawVillas(); }
+  else if('mv' in d) moveFav(d.mv, +d.d);
+  else if('layer' in d){ LAY[d.layer] = !LAY[d.layer]; store.set('phk-layers', LAY); renderLayers(); applyLayers(); }
+  else if('onmap' in d){ const id = d.onmap; closeSheet(); setTab('map'); if(map) setTimeout(() => selectVilla(id, true), 120); }
+  else if('unpeek' in d){ sel = null; $('#peek').classList.remove('on'); drawVillas(); }
+  else if('ext' in d){ if(openExt(el.href)) e.preventDefault(); }
+});
+$('#sort').addEventListener('change', e => { F.sort = e.target.value; store.set('phk-filter', F); renderList(); });
+document.addEventListener('keydown', e => { if(e.key === 'Escape' && openId) closeSheet(); });
+
+renderFilters(); renderList(); renderFav(); renderLayers();
+}
+</script>
+</body>
+</html>
