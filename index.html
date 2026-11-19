@@ -246,6 +246,7 @@ const TRIP = {
   ppMax: 120000,
   rate: 2.3967,
   usd: 80.9734,
+  eur: 90.4635,
   rateNote: 'курсу ЦБ РФ на 3 ноября 2026'
 };
 const SYNC = { api: 'https://jsonblob.com/api/jsonBlob/', id: '' };
@@ -292,6 +293,16 @@ const VILLAS = [
     pros:['Всё включено: свет, вода, уборка, бассейн','Полная приватность, сад'],
     cons:['В пик сезона минимальный срок — 12 ночей, у нас 11','Вечеринки запрещены','Залог 10 000 ฿ наличными'],
     note:'В пик сезона минимальный срок аренды — 12 ночей, а у нас 11: уточнить у агента. Заезд с 15:00, выезд до 12:00, залог 10 000 ฿ наличными. Внутри не курить, без животных и вечеринок. Цена указана в долларах: $6 000.' },
+  { id:'karon-ivan', name:'Вилла на пляже Karon', area:'Карон', lat:7.8440, lng:98.3070, approx:true, approxText:'точка по карте Airbnb, примерная',
+    priceEur:3829, bedrooms:3, beds:3, baths:'2,5', guests:7, pool:null,
+    seaText:'≈10 мин пешком до пляжа Карон', source:'Airbnb',
+    photos:['photos/karon-ivan-01.jpg','photos/karon-ivan-02.jpg','photos/karon-ivan-03.jpg','photos/karon-ivan-04.jpg','photos/karon-ivan-05.jpg','photos/karon-ivan-06.jpg','photos/karon-ivan-07.jpg','photos/karon-ivan-08.jpg'],
+    desc:'Вилла с 3 спальнями в Кароне — около 10 минут пешком до пляжа. Большая светлая гостиная с телевизором и настольным футболом, просторная полностью оборудованная кухня, задняя зона отдыха с барбекю, собственный сад и кухня на открытом воздухе. Рядом кафе, магазины, массажные салоны. Хозяин Ivan, 2 года принимает гостей, 1 отзыв.',
+    amenities:['Свой сад','Кухня на открытом воздухе','Барбекю','Беседка','Рисоварка','Стиральная машина','Бесплатная парковка','Кондиционеры','ТВ','Настольный футбол'],
+    layout:['3 спальни, 3 кровати','2,5 ванные','Гостиная, кухня и столовая — открытое пространство'],
+    pros:['Дешевле остальных','Пешком до пляжа Карон','Сад с беседкой и барбекю'],
+    cons:['Бассейна в объявлении нет','Электричество оплачивается отдельно по счётчику','Всего 1 отзыв'],
+    note:'Цена с Airbnb: 3 829 € за 11 ночей (27 дек – 7 янв). Электричество — отдельно по счётчику. Точку на карте Airbnb показывает примерно.' },
   { id:'patong-urban-oasis', name:'Urban Oasis Villa', area:'Патонг', lat:7.879417, lng:98.294306,
     priceThb:227000, bedrooms:4, pool:true, poolNote:'свой, с джакузи',
     photos:[], link:'https://amo.si/K/ZTQFJO/ZOO2OO', linkText:'Объявление и фото (ссылка 1)', link2:'https://amo.si/K/ZTIZ4A/ZOGSUY', link2Text:'Объявление и фото (ссылка 2)',
@@ -473,8 +484,10 @@ const beaches = PLACES.filter(p => p.type === 'beach');
 const bangla = PLACES.find(p => p.id === 'bangla');
 VILLAS.forEach((v, idx) => {
   v.imgs = (v.photos && v.photos.length) ? v.photos : [ph(idx, 0, v.link ? 'Фото — по ссылке в карточке' : 'Фото скоро будут')];
-  if(v.priceUsd) v.priceThb = Math.round(v.priceUsd * TRIP.usd / TRIP.rate / 100) * 100;
-  v.thb = v.priceThb; v.total = v.priceUsd ? v.priceUsd * TRIP.usd : v.priceThb * TRIP.rate;
+  const fx = v.priceUsd ? v.priceUsd * TRIP.usd : v.priceEur ? v.priceEur * TRIP.eur : null;
+  if(fx) v.priceThb = Math.round(fx / TRIP.rate / 100) * 100;
+  v.fx = !!fx;
+  v.thb = v.priceThb; v.total = fx || v.priceThb * TRIP.rate;
   v.nightThb = v.priceThb / TRIP.nights; v.night = v.total / TRIP.nights;
   v.pp = v.total / TRIP.people;
   const nb = beaches.map(b => ({ b, d: dist(v, b) })).sort((a, b) => a.d - b.d)[0];
@@ -483,7 +496,8 @@ VILLAS.forEach((v, idx) => {
   v.fit = v.pp <= TRIP.ppMax ? 'ok' : v.pp <= TRIP.ppMax * 1.1 ? 'mid' : 'over';
 });
 const usd = n => '$' + Math.round(n).toLocaleString('ru-RU');
-const mainP = v => v.priceUsd ? usd(v.priceUsd) : thb(v.thb);
+const eur = n => Math.round(n).toLocaleString('ru-RU') + '\u00a0€';
+const mainP = v => v.priceUsd ? usd(v.priceUsd) : v.priceEur ? eur(v.priceEur) : thb(v.thb);
 const seaTxt = v => v.seaText ? v.seaText : v.seaM != null ? km(v.seaM / 1000) + ' до моря' : '≈\u00a0' + km(v.beach) + ' до пляжа';
 function facts(v, full){
   const f = [v.bedrooms ? `${v.bedrooms} спальни` : 'спальни — уточнить'];
@@ -533,7 +547,7 @@ function card(v){
   const r = favs.indexOf(v.id);
   return `<article class="card">${gallery(v)}${heartBtn(v)}<span class="badge ${v.fit}">${FIT[v.fit]}</span>${r > -1 ? `<span class="rank">${r + 1}</span>` : ''}</div>
   <div class="body" data-open="${v.id}">
-    <div class="r1"><h3>${esc(v.name)}</h3><div class="price"><b>${mainP(v)}</b><small>${v.priceUsd ? '≈ ' + thb(v.thb) + ' · ' : ''}≈ ${rub(v.total)} за ${TRIP.nights} ночей</small></div></div>
+    <div class="r1"><h3>${esc(v.name)}</h3><div class="price"><b>${mainP(v)}</b><small>${v.fx ? '≈ ' + thb(v.thb) + ' · ' : ''}≈ ${rub(v.total)} за ${TRIP.nights} ночей</small></div></div>
     <div class="area"><svg class="i"><use href="#i-pin"/></svg>${esc(v.area)} · ${seaTxt(v)}${v.toBangla != null && v.toBangla < 4 ? ' · ' + km(v.toBangla) + ' до Bangla' : ''}</div>
     <ul class="facts">${facts(v)}</ul>
     <div class="tot"><span>Ночь <b>${thb(v.nightThb)}</b> · ${rub(v.night)}</span><span>На ${TRIP.people}: <b>${rub(v.pp)}</b> с чел.</span></div>
@@ -568,10 +582,10 @@ function openSheet(id){
   <div class="shb">
     <div class="r1"><div><div class="area"><svg class="i"><use href="#i-pin"/></svg>${esc(v.area)} · ${seaTxt(v)}</div><h2>${esc(v.name)}</h2></div>
       ${heartBtn(v, true)}</div>
-    <div class="pbox"><div><small>За ${TRIP.nights} ночей</small><b>${mainP(v)}</b><em>${v.priceUsd ? '≈ ' + thb(v.thb) + '<br>' : ''}≈ ${rub(v.total)}</em></div>
+    <div class="pbox"><div><small>За ${TRIP.nights} ночей</small><b>${mainP(v)}</b><em>${v.fx ? '≈ ' + thb(v.thb) + '<br>' : ''}≈ ${rub(v.total)}</em></div>
       <div><small>За ночь</small><b>${thb(v.nightThb)}</b><em>≈ ${rub(v.night)}</em></div>
       <div><small>С человека (на ${TRIP.people})</small><b>${rub(v.pp)}</b><em>≈ ${thb(v.pp / TRIP.rate)}</em></div></div>
-    <p class="rate">Рубли — по ${TRIP.rateNote}: ${TRIP.rate.toFixed(2).replace('.', ',')} ₽ за бат${v.priceUsd ? ', ' + TRIP.usd.toFixed(2).replace('.', ',') + ' ₽ за доллар' : ''}.</p>
+    <p class="rate">Рубли — по ${TRIP.rateNote}: ${TRIP.rate.toFixed(2).replace('.', ',')} ₽ за бат${v.priceUsd ? ', ' + TRIP.usd.toFixed(2).replace('.', ',') + ' ₽ за доллар' : ''}${v.priceEur ? ', ' + TRIP.eur.toFixed(2).replace('.', ',') + ' ₽ за евро' : ''}.</p>
     <ul class="facts">${facts(v, true)}</ul>
     <h4>Кому нравится</h4><div class="lk" data-lk="${v.id}" data-full="1" style="margin-top:0">${likersHTML(v.id, true)}</div>
     ${v.desc ? `<p class="desc">${esc(v.desc)}</p>` : ''}
