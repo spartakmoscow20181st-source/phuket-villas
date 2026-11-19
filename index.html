@@ -6,9 +6,7 @@
 <title>Виллы на Пхукете</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&family=Unbounded:wght@600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
 :root{--bg:#f5f3ee;--card:#fff;--ink:#13242a;--mute:#5e6e73;--line:#e3dfd4;--sea:#0b5d63;--sea-ink:#fff;--soft:#e6f1ef;
 --coral:#ff6a45;--sun:#ffc23d;--ok:#1d9466;--navh:64px;--sb:env(safe-area-inset-bottom,0px);--st:env(safe-area-inset-top,0px)}
@@ -72,25 +70,51 @@ nav.tabs button.on{color:var(--sea)}
 :root[data-theme=dark] nav.tabs button.on{color:#5fd0c8}
 nav.tabs em{position:absolute;top:8px;left:calc(50% + 6px);background:var(--coral);color:#fff;font-style:normal;font-size:11px;min-width:18px;height:18px;border-radius:9px;display:grid;place-items:center;padding:0 5px}
 nav.tabs em:empty{display:none}
-/* карта */
+/* карта — условная схема */
+:root{--seaM:#bfe2e8;--land:#f5f0e1;--coast:#ffffff;--hill:#d3e6c2;--road:#ffffff;--roadE:#d8ceb0;--lab:#4a6064;--seaL:#3f8794}
+:root[data-theme=dark]{--seaM:#08202a;--land:#22342f;--coast:#3a5a55;--hill:#2a4335;--road:#415a55;--roadE:#2a403c;--lab:#9fb6b5;--seaL:#5fa9b3}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--seaM:#08202a;--land:#22342f;--coast:#3a5a55;--hill:#2a4335;--road:#415a55;--roadE:#2a403c;--lab:#9fb6b5;--seaL:#5fa9b3}}
 #mapView{padding:0}
-#map{position:fixed;left:0;right:0;top:0;bottom:calc(var(--navh) + var(--sb));background:var(--soft);z-index:1}
+#map{position:fixed;left:0;right:0;top:0;bottom:calc(var(--navh) + var(--sb));background:var(--seaM);overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none;z-index:1;cursor:grab}
+#msvg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.land{fill:var(--land);stroke:var(--coast);stroke-width:2.5}
+.main{fill:var(--land);opacity:.75}
+.hill{fill:var(--hill)}
+.road{fill:none;stroke:var(--road);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.roadE{fill:none;stroke:var(--roadE);stroke-width:6;stroke-linecap:round;stroke-linejoin:round}
+#mk{position:absolute;inset:0;pointer-events:none}
+.mk{position:absolute;left:0;top:0;width:0;height:0}
+.mk>.vpin,.mk>.ppin{pointer-events:auto;cursor:pointer}
+.vpin{position:absolute;left:0;top:0;transform:translate(-50%,calc(-100% - 7px));background:var(--coral);color:#fff;font:800 12px Manrope,sans-serif;padding:5px 9px;border-radius:11px;white-space:nowrap;box-shadow:0 3px 10px rgba(0,0,0,.3);border:2px solid #fff}
+.vpin::after{content:"";position:absolute;left:50%;bottom:-9px;margin-left:-5px;border:5px solid transparent;border-top-color:#fff}
+#mk.small .vpin{font-size:0;padding:0;width:16px;height:16px;border-radius:50%;transform:translate(-50%,-50%)}
+#mk.small .vpin::after{display:none}
+.vpin.fav{background:#c2185b}.vpin.sel{background:var(--sea);transform:translate(-50%,calc(-100% - 7px)) scale(1.15)}
+.ppin{position:absolute;left:-12px;top:-12px;width:24px;height:24px;border-radius:50%;border:2px solid #fff;display:grid;place-items:center;box-shadow:0 2px 6px rgba(0,0,0,.3)}
+.ppin svg{width:13px;height:13px;stroke:#fff;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.pl{position:absolute;top:-9px;line-height:18px;font-size:12px;font-weight:700;white-space:nowrap;color:var(--ink);text-shadow:0 0 3px var(--land),0 0 3px var(--land),0 0 4px var(--land)}
+.pl.r{left:15px}.pl.l{right:15px}
+.al{position:absolute;left:0;top:0;transform:translate(-50%,-50%);font-size:13px;font-style:italic;font-weight:600;color:var(--lab);white-space:nowrap}
+.al.sea{font-size:14px;color:var(--seaL)}
+.hide{visibility:hidden}
+.tip{position:absolute;left:0;top:0;transform:translate(-50%,calc(-100% - 18px));pointer-events:auto;background:var(--card);color:var(--ink);border-radius:12px;padding:9px 12px;box-shadow:0 6px 20px rgba(0,0,0,.25);font-size:13px;width:max-content;max-width:230px;line-height:1.35}
+.tip b{display:block;font-size:14px}.tip a{display:inline-block;margin-top:6px;font-weight:800;color:var(--sea)}
+:root[data-theme=dark] .tip a{color:#5fd0c8}
+.zb{position:fixed;right:10px;top:calc(62px + var(--st));z-index:30;display:flex;flex-direction:column;gap:8px}
+.zb button{width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--card);font-size:22px;font-weight:800;line-height:1;box-shadow:0 2px 10px rgba(0,0,0,.15)}
+.mtools{position:fixed;left:10px;bottom:calc(var(--navh) + var(--sb) + 10px);z-index:30;display:flex;gap:8px}
+.mtools .chip{box-shadow:0 2px 10px rgba(0,0,0,.15)}
+.scale{position:fixed;right:12px;bottom:calc(var(--navh) + var(--sb) + 12px);z-index:30;font-size:12px;font-weight:700;color:var(--lab);text-align:right}
+.scale i{display:block;height:6px;border:2px solid var(--lab);border-top:0;margin:0 0 2px auto}
+.scale small{display:block;font-size:11px;font-weight:500}
 .layers{position:fixed;top:calc(10px + var(--st));left:0;right:0;z-index:30}
 .layers .chip{box-shadow:0 2px 10px rgba(0,0,0,.15)}
 .layers .chip i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:0}
-.vpin{position:absolute;transform:translate(-50%,-100%);background:var(--coral);color:#fff;font:800 12px Manrope,sans-serif;padding:5px 9px;border-radius:11px;white-space:nowrap;box-shadow:0 3px 10px rgba(0,0,0,.3);border:2px solid #fff}
-.vpin::after{content:"";position:absolute;left:50%;bottom:-7px;margin-left:-5px;border:5px solid transparent;border-top-color:#fff}
-.vpin.fav{background:#c2185b}.vpin.sel{background:var(--sea);transform:translate(-50%,-100%) scale(1.15);z-index:9}
-.ppin{position:absolute;transform:translate(-50%,-50%);width:28px;height:28px;border-radius:50%;border:2px solid #fff;display:grid;place-items:center;box-shadow:0 2px 6px rgba(0,0,0,.3)}
-.ppin svg{width:15px;height:15px;stroke:#fff;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
-.leaflet-popup-content{font:14px/1.4 Manrope,sans-serif;margin:10px 12px}
-.leaflet-popup-content b{display:block;font-size:15px}
 .peek{position:fixed;left:10px;right:10px;bottom:calc(var(--navh) + var(--sb) + 10px);z-index:40;background:var(--card);border-radius:18px;display:none;grid-template-columns:96px minmax(0,1fr);gap:12px;padding:10px;box-shadow:0 10px 30px rgba(0,0,0,.3);max-width:520px;margin:0 auto}
 .peek.on{display:grid}
 .peek img{width:96px;height:96px;border-radius:12px;object-fit:cover}
 .peek h3{font-size:15px;padding-right:30px}
 .peek .x{position:absolute;top:6px;right:6px}
-.mapmsg{position:fixed;inset:0;display:grid;place-items:center;text-align:center;padding:30px;color:var(--mute)}
 /* избранное */
 .head2{padding:calc(20px + var(--st)) 16px 6px;max-width:1100px;margin:0 auto}
 .head2 h2{font-size:26px}
@@ -264,6 +288,9 @@ const PLACES = [
 <section id="mapView" class="view">
   <div id="map"></div>
   <div class="layers"><div class="chips" id="layers"></div></div>
+  <div class="zb"><button data-zoom="1" aria-label="Приблизить">+</button><button data-zoom="-1" aria-label="Отдалить">−</button></div>
+  <div class="mtools" id="mtools"><button class="chip" data-fit="villas">Виллы</button><button class="chip" data-fit="island">Весь остров</button></div>
+  <div class="scale" id="scale"><i></i><span></span><small>схема условная</small></div>
   <div class="peek" id="peek"></div>
 </section>
 
@@ -311,7 +338,7 @@ const inTG = !!(tg && tg.initData);
 /* ---------- Telegram ---------- */
 function applyTheme(){ if(inTG) document.documentElement.dataset.theme = tg.colorScheme === 'dark' ? 'dark' : 'light'; }
 if(inTG){
-  try{ tg.ready(); tg.expand(); applyTheme(); tg.onEvent('themeChanged', applyTheme); }catch(e){}
+  try{ tg.ready(); tg.expand(); if(tg.disableVerticalSwipes) tg.disableVerticalSwipes(); applyTheme(); tg.onEvent('themeChanged', applyTheme); }catch(e){}
 }
 const haptic = () => { try{ inTG && tg.HapticFeedback.impactOccurred('light'); }catch(e){} };
 function openExt(url){ if(inTG){ try{ tg.openLink(url); return true; }catch(e){} } return false; }
@@ -517,60 +544,253 @@ $('#copyBtn').addEventListener('click', async () => {
     try{ document.execCommand('copy'); toast('Текст скопирован'); }catch(_){ toast('Не удалось скопировать'); } a.remove(); }
 });
 
-/* ---------- карта ---------- */
-let map = null, villaLayer = null, sel = null;
-const catLayers = {};
+/* ---------- карта: условная схема острова, без внешних сервисов ----------
+   Контур, дороги и подписи нарисованы по примерным координатам.
+   Точки вилл и мест ставятся по их lat/lng, поэтому взаимное расположение верное. */
+const LON0 = 98.15, LAT0 = 8.32, KX = 110.6 * Math.cos(7.95 * Math.PI / 180), KY = 110.6;
+const P = (la, lo) => [(lo - LON0) * KX, (LAT0 - la) * KY];   // в километрах
+const COAST = [[8.197,98.300],[8.170,98.285],[8.120,98.290],[8.080,98.293],[8.040,98.276],[8.010,98.279],[7.990,98.283],[7.975,98.276],
+  [7.965,98.271],[7.955,98.280],[7.935,98.276],[7.915,98.290],[7.897,98.293],[7.885,98.289],[7.875,98.272],[7.860,98.282],[7.845,98.291],
+  [7.830,98.293],[7.820,98.295],[7.808,98.296],[7.795,98.299],[7.778,98.302],[7.762,98.302],[7.757,98.311],[7.765,98.325],[7.776,98.331],
+  [7.790,98.336],[7.805,98.346],[7.815,98.355],[7.825,98.366],[7.830,98.381],[7.810,98.395],[7.801,98.410],[7.815,98.416],[7.840,98.408],
+  [7.856,98.405],[7.870,98.411],[7.886,98.406],[7.905,98.411],[7.930,98.401],[7.960,98.415],[7.990,98.411],[8.020,98.430],[8.050,98.436],
+  [8.080,98.430],[8.110,98.402],[8.140,98.372],[8.170,98.342],[8.190,98.320]];
+const MAINLAND = [[8.40,98.05],[8.40,98.70],[8.222,98.70],[8.214,98.46],[8.212,98.36],[8.209,98.30],[8.214,98.22],[8.225,98.05]];
+const HILLS = [[8.035,98.372,3.2,4.8],[7.912,98.318,1.7,2.6],[7.830,98.316,1.5,2.3],[7.875,98.330,1.6,2.0],[7.975,98.310,1.6,2.8],[7.790,98.318,1.1,1.4]];
+const ROADS = [
+  [[8.209,98.300],[8.185,98.306],[8.140,98.318],[8.100,98.330],[8.050,98.338],[8.000,98.346],[7.950,98.361],[7.910,98.373],[7.885,98.386]],
+  [[7.893,98.299],[7.900,98.315],[7.905,98.335],[7.899,98.356],[7.889,98.376]],
+  [[7.885,98.386],[7.865,98.366],[7.846,98.339],[7.815,98.331],[7.786,98.329],[7.773,98.321]],
+  [[7.887,98.297],[7.868,98.294],[7.845,98.299],[7.822,98.302],[7.800,98.306],[7.781,98.309],[7.773,98.321]],
+  [[7.845,98.299],[7.846,98.339]],
+  [[7.900,98.299],[7.920,98.298],[7.950,98.290],[7.975,98.287],[8.000,98.301],[8.020,98.321],[8.032,98.339]],
+  [[8.113,98.309],[8.100,98.330]],
+  [[7.885,98.386],[7.862,98.401]]
+];
+const AREAS = [['Патонг',7.904,98.313],['Камала',7.957,98.298],['Карон',7.849,98.309],['Ката',7.815,98.314],['Равай',7.783,98.339],
+  ['Чалонг',7.833,98.349],['Пхукет-таун',7.902,98.392],['Кату',7.917,98.341],['Таланг',8.035,98.352],['Банг Тао',8.002,98.302],
+  ['Май Кхао',8.160,98.306],['Кейп Панва',7.815,98.398]];
+const SEAS = [['Андаманское море',7.930,98.205],['Залив Пхангнга',8.000,98.500],['Материк',8.290,98.380]];
+
+const f2 = p => p[0].toFixed(2) + ',' + p[1].toFixed(2);
+function curve(ll, closed){
+  const p = ll.map(a => P(a[0], a[1])), n = p.length;
+  const at = i => closed ? p[(i + n) % n] : p[Math.max(0, Math.min(n - 1, i))];
+  let d = 'M' + f2(p[0]);
+  for(let i = 0; i < (closed ? n : n - 1); i++){
+    const a = at(i - 1), b = at(i), c = at(i + 1), e = at(i + 2);
+    d += 'C' + f2([b[0] + (c[0] - a[0]) / 6, b[1] + (c[1] - a[1]) / 6]) + ' ' + f2([c[0] - (e[0] - b[0]) / 6, c[1] - (e[1] - b[1]) / 6]) + ' ' + f2(c);
+  }
+  return d + (closed ? 'Z' : '');
+}
+const poly = ll => 'M' + ll.map(a => f2(P(a[0], a[1]))).join('L') + 'Z';
+function boundsOf(ll){
+  const p = ll.map(a => P(a[0], a[1])), xs = p.map(q => q[0]), ys = p.map(q => q[1]);
+  return { x0: Math.min(...xs), x1: Math.max(...xs), y0: Math.min(...ys), y1: Math.max(...ys) };
+}
+const ISLAND = boundsOf(COAST);
+const villaBounds = () => boundsOf([...VILLAS.map(v => [v.lat, v.lng]), [7.8961, 98.2960]]);
+
 const LAY = store.get('phk-layers', { villas:true, favOnly:false, beach:true, sight:true, night:true, shop:false, transport:true });
+let map = null, sel = null, tipId = null, items = [], fitted = false, lastW = 0, lastH = 0, raf = 0, anim = 0;
+const V = { k: 20, tx: 0, ty: 0 };
+const KMIN = 4, KMAX = 600, clampK = k => Math.max(KMIN, Math.min(KMAX, k));
+const mapEl = $('#map');
+
+function worldSVG(){
+  const coast = curve(COAST, true), roads = ROADS.map(r => curve(r, false));
+  const hills = HILLS.map(([la, lo, rx, ry]) => { const [x, y] = P(la, lo); return `<ellipse class="hill" cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" rx="${rx}" ry="${ry}"/>`; }).join('');
+  const ns = 'vector-effect="non-scaling-stroke"';
+  return `<defs><clipPath id="isl"><path d="${coast}"/></clipPath></defs>
+    <path class="main" d="${poly(MAINLAND)}"/>
+    <path class="roadE" ${ns} d="M${f2(P(8.197, 98.300))}L${f2(P(8.211, 98.300))}"/>
+    <path class="land" ${ns} d="${coast}"/>
+    <g clip-path="url(#isl)">${hills}</g>
+    ${roads.map(d => `<path class="roadE" ${ns} d="${d}"/>`).join('')}
+    ${roads.map(d => `<path class="road" ${ns} d="${d}"/>`).join('')}`;
+}
 function initMap(){
   if(map) return true;
-  if(!window.L){ $('#mapView').insertAdjacentHTML('beforeend', '<div class="mapmsg">Карта не загрузилась — проверьте интернет и откройте страницу заново.</div>'); return false; }
-  map = L.map('map', { zoomControl:false, attributionControl:true }).setView([7.88, 98.32], 11);
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
-    { subdomains:'abcd', maxZoom:19, attribution:'© OpenStreetMap, © CARTO' }).addTo(map);
-  villaLayer = L.layerGroup();
-  Object.keys(CAT).forEach(k => {
-    catLayers[k] = L.layerGroup(PLACES.filter(p => p.type === k).map(p =>
-      L.marker([p.lat, p.lng], { icon: L.divIcon({ className:'', iconSize:[0, 0],
-        html:`<div class="ppin" style="background:${CAT[k].color}"><svg viewBox="0 0 24 24">${CAT[k].svg}</svg></div>` }) })
-      .bindPopup(`<b>${esc(p.name)}</b>${esc(p.desc || '')}<br><a href="https://www.google.com/maps/search/?api=1&query=${p.lat},${p.lng}" target="_blank" rel="noopener" data-ext>Google Maps</a>`)));
+  map = {};
+  mapEl.innerHTML = `<svg id="msvg" aria-label="Схема Пхукета"><g id="world">${worldSVG()}</g></svg><div id="mk"></div>`;
+  bindMapGestures();
+  const mapRO = new ResizeObserver(() => {
+    const W = mapEl.clientWidth, H = mapEl.clientHeight; if(!W || !H) return;
+    if(!fitted){ fitted = true; fitTo(villaBounds()); }
+    else if(lastW){ V.tx += (W - lastW) / 2; V.ty += (H - lastH) / 2; }
+    lastW = W; lastH = H; render();
   });
-  map.on('click', () => { sel = null; $('#peek').classList.remove('on'); drawVillas(); });
-  drawVillas(); applyLayers();
-  const pts = VILLAS.map(v => [v.lat, v.lng]);
-  if(pts.length) map.fitBounds(pts, { padding:[60, 60], maxZoom:13 });
+  mapRO.observe(mapEl);
+  drawVillas();
+  if(document.fonts) document.fonts.ready.then(() => drawVillas());
   return true;
 }
+function fitTo(b, animate){
+  const W = mapEl.clientWidth, H = mapEl.clientHeight; if(!W || !H) return;
+  const pt = 110, pb = 90, px = 50;
+  const k = clampK(Math.min((W - 2 * px) / Math.max(b.x1 - b.x0, .5), (H - pt - pb) / Math.max(b.y1 - b.y0, .5)));
+  setView(W / 2 - (b.x0 + b.x1) / 2 * k, pt + (H - pt - pb) / 2 - (b.y0 + b.y1) / 2 * k, k, animate);
+}
+function stopAnim(){ cancelAnimationFrame(anim); anim = 0; }
+function setView(tx, ty, k, animate){
+  stopAnim();
+  const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(!animate || reduce){ V.tx = tx; V.ty = ty; V.k = k; render(); return; }
+  const s = { tx: V.tx, ty: V.ty, k: V.k }, t0 = performance.now(), D = 300;
+  const step = t => {
+    const q = Math.min(1, (t - t0) / D), e = 1 - (1 - q) ** 3;
+    V.tx = s.tx + (tx - s.tx) * e; V.ty = s.ty + (ty - s.ty) * e; V.k = s.k + (k - s.k) * e; doRender();
+    anim = q < 1 ? requestAnimationFrame(step) : 0;
+  };
+  anim = requestAnimationFrame(step);
+}
+function zoomAt(sx, sy, f){
+  const k2 = clampK(V.k * f), r = k2 / V.k;
+  V.tx = sx - (sx - V.tx) * r; V.ty = sy - (sy - V.ty) * r; V.k = k2;
+}
+function clampView(W, H){
+  const m = 60, b = ISLAND;
+  const x0 = b.x0 * V.k + V.tx, x1 = b.x1 * V.k + V.tx, y0 = b.y0 * V.k + V.ty, y1 = b.y1 * V.k + V.ty;
+  if(x1 < m) V.tx += m - x1; if(x0 > W - m) V.tx -= x0 - (W - m);
+  if(y1 < m) V.ty += m - y1; if(y0 > H - m) V.ty -= y0 - (H - m);
+}
+
 function drawVillas(){
   if(!map) return;
-  villaLayer.clearLayers();
-  const list = LAY.favOnly ? VILLAS.filter(v => favs.includes(v.id)) : filtered();
-  if(sel && !list.some(v => v.id === sel)) list.push(VILLAS.find(v => v.id === sel));
-  list.forEach(v => {
-    const cls = v.id === sel ? 'sel' : favs.includes(v.id) ? 'fav' : '';
-    const label = (favs.includes(v.id) ? '♥ ' : '') + Math.round(v.night / 1000) + ' тыс';
-    L.marker([v.lat, v.lng], { zIndexOffset: v.id === sel ? 1000 : 500, icon: L.divIcon({ className:'', iconSize:[0, 0], html:`<div class="vpin ${cls}">${label}</div>` }) })
-      .on('click', e => { L.DomEvent.stopPropagation(e); selectVilla(v.id); }).addTo(villaLayer);
+  const vs = (LAY.favOnly ? VILLAS.filter(v => favs.includes(v.id)) : LAY.villas ? filtered() : []).slice();
+  if(sel && !vs.some(v => v.id === sel)){ const s = VILLAS.find(v => v.id === sel); if(s) vs.push(s); }
+  vs.sort((a, b) => (a.id === sel) - (b.id === sel));
+  const PR = { beach: 5, sight: 5, transport: 4, night: 3, shop: 2 }, MINK = { beach: 7, sight: 7, transport: 5, night: 22, shop: 22 };
+  const ps = PLACES.filter(p => LAY[p.type]).sort((a, b) => PR[b.type] - PR[a.type]);
+  const defs = [
+    ...SEAS.map(([n, la, lo]) => ({ kind: 'area', minK: 0, xy: P(la, lo), html: `<div class="mk"><span class="al sea">${esc(n)}</span></div>` })),
+    ...ps.map(p => ({ kind: 'poi', id: p.id, minK: MINK[p.type], side: p.type === 'beach' ? 'l' : 'r', xy: P(p.lat, p.lng),
+      html: `<div class="mk" data-pid="${p.id}"><div class="ppin" style="background:${CAT[p.type].color}"><svg viewBox="0 0 24 24">${CAT[p.type].svg}</svg></div><span class="pl r">${esc(p.name)}</span></div>` })),
+    ...AREAS.map(([n, la, lo]) => ({ kind: 'area', minK: 6, xy: P(la, lo), html: `<div class="mk"><span class="al">${esc(n)}</span></div>` })),
+    ...vs.map(v => ({ kind: 'villa', xy: P(v.lat, v.lng),
+      html: `<div class="mk" data-vid="${v.id}"><div class="vpin ${v.id === sel ? 'sel' : favs.includes(v.id) ? 'fav' : ''}">${favs.includes(v.id) ? '♥ ' : ''}${Math.round(v.night / 1000)} тыс</div></div>` }))
+  ];
+  const tp = tipId && PLACES.find(p => p.id === tipId && LAY[p.type]);
+  if(!tp) tipId = null;
+  const tipHTML = tp ? `<div class="mk" id="tipmk"><div class="tip"><b>${esc(tp.name)}</b>${esc(tp.desc || '')}<br><a data-ext href="https://www.google.com/maps/search/?api=1&query=${tp.lat},${tp.lng}" target="_blank" rel="noopener">Открыть в Google Maps</a></div></div>` : '';
+  const mk = $('#mk');
+  mk.innerHTML = defs.map(d => d.html).join('') + tipHTML;
+  items = defs.map((d, i) => {
+    const el = mk.children[i], it = { ...d, x: d.xy[0], y: d.xy[1], el };
+    if(d.kind === 'villa'){ it.w = el.firstChild.offsetWidth; it.h = el.firstChild.offsetHeight + 7; }
+    else { it.lab = el.querySelector('.pl,.al'); it.lw = it.lab.offsetWidth; }
+    if(d.kind === 'poi' && d.id === tipId) it.tip = true;
+    return it;
   });
+  render();
+}
+function render(){ if(!raf) raf = requestAnimationFrame(doRender); }
+function doRender(){
+  raf = 0; if(!map) return;
+  const W = mapEl.clientWidth, H = mapEl.clientHeight; if(!W || !H) return;
+  clampView(W, H);
+  const world = $('#world'); if(!world) return;
+  world.setAttribute('transform', `translate(${V.tx.toFixed(1)} ${V.ty.toFixed(1)}) scale(${V.k.toFixed(4)})`);
+  const small = V.k < 14; $('#mk').classList.toggle('small', small);
+  const placed = [], hit = b => placed.some(o => b[0] < o[2] && b[2] > o[0] && b[1] < o[3] && b[3] > o[1]);
+  const off = b => b[0] < 2 || b[2] > W - 2 || b[1] < 2 || b[3] > H - 2;
+  for(const it of items){
+    it.sx = it.x * V.k + V.tx; it.sy = it.y * V.k + V.ty;
+    it.el.style.transform = `translate(${it.sx.toFixed(1)}px,${it.sy.toFixed(1)}px)`;
+    if(it.kind === 'villa') placed.push(small ? [it.sx - 9, it.sy - 9, it.sx + 9, it.sy + 9] : [it.sx - it.w / 2 - 2, it.sy - it.h - 2, it.sx + it.w / 2 + 2, it.sy]);
+    if(it.kind === 'poi') placed.push([it.sx - 13, it.sy - 13, it.sx + 13, it.sy + 13]);
+  }
+  for(const it of items){
+    if(!it.lab) continue;
+    const { sx, sy } = it;
+    if(it.kind === 'poi'){
+      const L = [sx - 15 - it.lw, sy - 9, sx - 15, sy + 9], R = [sx + 15, sy - 9, sx + 15 + it.lw, sy + 9];
+      const ok = V.k >= it.minK ? (it.side === 'l' ? [L, R] : [R, L]).find(b => !off(b) && !hit(b)) : null;
+      it.lab.classList.toggle('hide', !ok);
+      if(ok){ placed.push(ok); it.lab.classList.toggle('l', ok === L); it.lab.classList.toggle('r', ok === R); }
+    } else {
+      const b = [sx - it.lw / 2, sy - 10, sx + it.lw / 2, sy + 10];
+      const ok = V.k >= it.minK && !hit(b) && !off(b);
+      it.lab.classList.toggle('hide', !ok); if(ok) placed.push(b);
+    }
+  }
+  const tip = $('#tipmk'), tp = tipId && items.find(i => i.id === tipId);
+  if(tip && tp) tip.style.transform = `translate(${tp.sx.toFixed(1)}px,${tp.sy.toFixed(1)}px)`;
+  const km1 = 100 / V.k, nice = [0.1, 0.2, 0.5, 1, 2, 5, 10, 20].reduce((a, n) => n <= km1 ? n : a, 0.1);
+  $('#scale i').style.width = (nice * V.k).toFixed(0) + 'px';
+  $('#scale span').textContent = nice < 1 ? (nice * 1000) + ' м' : nice + ' км';
+}
+function bindMapGestures(){
+  const pts = new Map(); let moved = 0, downEl = null, lastTap = 0;
+  mapEl.addEventListener('pointerdown', e => {
+    if(e.target.closest('.tip')) return;
+    try{ mapEl.setPointerCapture(e.pointerId); }catch(_){}
+    pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if(pts.size === 1){ moved = 0; downEl = e.target; } else moved = 99;
+    stopAnim();
+  });
+  mapEl.addEventListener('pointermove', e => {
+    const p = pts.get(e.pointerId); if(!p) return;
+    if(pts.size === 1){
+      const dx = e.clientX - p.x, dy = e.clientY - p.y;
+      V.tx += dx; V.ty += dy; moved += Math.abs(dx) + Math.abs(dy);
+    } else if(pts.size === 2){
+      const r = mapEl.getBoundingClientRect(), o = [...pts.values()].find(q => q !== p);
+      const d0 = Math.hypot(p.x - o.x, p.y - o.y), d1 = Math.hypot(e.clientX - o.x, e.clientY - o.y);
+      const m0x = (p.x + o.x) / 2 - r.left, m0y = (p.y + o.y) / 2 - r.top;
+      const m1x = (e.clientX + o.x) / 2 - r.left, m1y = (e.clientY + o.y) / 2 - r.top;
+      if(d0 > 0) zoomAt(m0x, m0y, d1 / d0);
+      V.tx += m1x - m0x; V.ty += m1y - m0y;
+    }
+    p.x = e.clientX; p.y = e.clientY; render();
+  });
+  mapEl.addEventListener('pointerup', e => {
+    if(!pts.has(e.pointerId)) return;
+    pts.delete(e.pointerId);
+    if(pts.size) return;
+    if(moved < 8 && downEl){
+      const now = Date.now(), r = mapEl.getBoundingClientRect();
+      const onMark = downEl.closest('[data-vid],[data-pid]');
+      if(!onMark && now - lastTap < 320){ zoomAt(e.clientX - r.left, e.clientY - r.top, 2); render(); lastTap = 0; }
+      else { lastTap = onMark ? 0 : now; mapTap(downEl); }
+    }
+    downEl = null;
+  });
+  mapEl.addEventListener('pointercancel', e => { pts.delete(e.pointerId); moved = 99; });
+  mapEl.addEventListener('wheel', e => {
+    e.preventDefault();
+    const r = mapEl.getBoundingClientRect();
+    zoomAt(e.clientX - r.left, e.clientY - r.top, Math.exp(-e.deltaY * 0.0015)); render();
+  }, { passive: false });
+}
+function mapTap(el){
+  const v = el.closest('[data-vid]'), p = el.closest('[data-pid]');
+  if(v) selectVilla(v.dataset.vid);
+  else if(p){ tipId = tipId === p.dataset.pid ? null : p.dataset.pid; drawVillas(); }
+  else if(sel || tipId){ sel = null; tipId = null; $('#peek').classList.remove('on'); syncMapUI(); drawVillas(); }
+}
+function syncMapUI(){
+  const on = $('#peek').classList.contains('on');
+  $('#mtools').style.display = on ? 'none' : '';
+  $('#scale').style.display = on ? 'none' : '';
 }
 function selectVilla(id, zoom){
-  const v = VILLAS.find(x => x.id === id); sel = id; drawVillas();
+  const v = VILLAS.find(x => x.id === id); if(!v) return;
+  sel = id; tipId = null; drawVillas();
   $('#peek').innerHTML = `<img src="${esc(v.imgs[0])}" alt=""><div><h3>${esc(v.name)}</h3>
     <div class="area">${esc(v.area)} · ${km(v.beach)} до пляжа</div><div style="margin-top:4px;font-size:14px"><b>${money(v.night)}</b> / ночь · ${v.bedrooms} спальни</div>
     <button class="chip" data-open="${v.id}" style="margin-top:8px;min-height:34px;padding:6px 12px">Подробнее</button></div>
     <button class="x" data-unpeek aria-label="Закрыть" style="width:30px;height:30px"><svg class="i" style="width:16px;height:16px"><use href="#i-x"/></svg></button>`;
-  $('#peek').classList.add('on');
-  zoom ? map.setView([v.lat, v.lng], 15) : map.panTo([v.lat, v.lng]);
+  $('#peek').classList.add('on'); syncMapUI();
+  const [x, y] = P(v.lat, v.lng), W = mapEl.clientWidth, H = mapEl.clientHeight;
+  const k = zoom ? Math.max(V.k, 70) : V.k;
+  setView(W / 2 - x * k, (H - 130) / 2 + 40 - y * k, k, true);
 }
 function renderLayers(){
-  const items = [['villas', 'Виллы', '#ff6a45'], ['favOnly', 'Только мой выбор', '#c2185b'], ...Object.entries(CAT).map(([k, c]) => [k, c.name, c.color])];
-  $('#layers').innerHTML = items.map(([k, t, c]) => `<button class="chip ${LAY[k] ? 'on' : ''}" data-layer="${k}"><i style="background:${c}"></i>${t}</button>`).join('');
+  const list = [['villas', 'Виллы', '#ff6a45'], ['favOnly', 'Только мой выбор', '#c2185b'], ...Object.entries(CAT).map(([k, c]) => [k, c.name, c.color])];
+  $('#layers').innerHTML = list.map(([k, t, c]) => `<button class="chip ${LAY[k] ? 'on' : ''}" data-layer="${k}"><i style="background:${c}"></i>${t}</button>`).join('');
 }
-function applyLayers(){
-  if(!map) return;
-  (LAY.villas || LAY.favOnly) ? villaLayer.addTo(map) : villaLayer.remove();
-  Object.keys(CAT).forEach(k => LAY[k] ? catLayers[k].addTo(map) : catLayers[k].remove());
-  drawVillas();
-}
+const applyLayers = drawVillas;
 
 /* ---------- вкладки и навигация ---------- */
 let tab = 'list';
@@ -578,7 +798,7 @@ function setTab(t){
   tab = t;
   document.querySelectorAll('.view').forEach(s => s.classList.toggle('on', s.id === t + 'View'));
   document.querySelectorAll('nav.tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === t));
-  if(t === 'map' && initMap()) setTimeout(() => map.invalidateSize(), 60);
+  if(t === 'map'){ initMap(); render(); }
   if(t === 'fav') renderFav();
   window.scrollTo(0, 0); syncBack();
 }
@@ -596,7 +816,7 @@ function refreshAll(){
 }
 
 document.addEventListener('click', e => {
-  const el = e.target.closest('[data-fav],[data-open],[data-close],[data-tab],[data-area],[data-flag],[data-reset],[data-mv],[data-layer],[data-onmap],[data-unpeek],[data-ext]');
+  const el = e.target.closest('[data-fav],[data-open],[data-close],[data-tab],[data-area],[data-flag],[data-reset],[data-mv],[data-layer],[data-onmap],[data-unpeek],[data-zoom],[data-fit],[data-ext]');
   if(!el) return;
   const d = el.dataset;
   if('fav' in d){ e.stopPropagation(); toggleFav(d.fav); }
@@ -609,7 +829,9 @@ document.addEventListener('click', e => {
   else if('mv' in d) moveFav(d.mv, +d.d);
   else if('layer' in d){ LAY[d.layer] = !LAY[d.layer]; store.set('phk-layers', LAY); renderLayers(); applyLayers(); }
   else if('onmap' in d){ const id = d.onmap; closeSheet(); setTab('map'); if(map) setTimeout(() => selectVilla(id, true), 120); }
-  else if('unpeek' in d){ sel = null; $('#peek').classList.remove('on'); drawVillas(); }
+  else if('unpeek' in d){ sel = null; $('#peek').classList.remove('on'); syncMapUI(); drawVillas(); }
+  else if('zoom' in d){ if(map){ zoomAt(mapEl.clientWidth / 2, mapEl.clientHeight / 2, d.zoom === '1' ? 1.7 : 1 / 1.7); render(); } }
+  else if('fit' in d){ if(map) fitTo(d.fit === 'island' ? ISLAND : villaBounds(), true); }
   else if('ext' in d){ if(openExt(el.href)) e.preventDefault(); }
 });
 $('#sort').addEventListener('change', e => { F.sort = e.target.value; store.set('phk-filter', F); renderList(); });
